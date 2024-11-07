@@ -1,0 +1,16 @@
+{
+  "HttpObjectBrowser": "martepy.marte2.objects.http.objectbrowser",
+  "HttpDirectoryResource": "martepy.marte2.objects.http.directoryresource",
+  "HttpMessageInterface": "martepy.marte2.objects.http.messageinterface",
+  "HttpService": "martepy.marte2.objects.http.service",
+  "Message": "martepy.marte2.objects.message",
+  "StateMachine": "martepy.marte2.objects.statemachine.machine",
+  "StateMachineEvent": "martepy.marte2.objects.statemachine.event",
+  "ReferenceContainer": "martepy.marte2.objects.referencecontainer",
+  "RealTimeState": "martepy.marte2.objects.real_time_state",
+  "RealTimeThread": "martepy.marte2.objects.real_time_thread",
+  "GAMScheduler": "martepy.marte2.objects.gam_scheduler",
+  "MARTe2ConfigurationDatabase": "martepy.marte2.objects.configuration_database",
+  "EventConditionTrigger":  "martepy.marte2.objects.statemachine.eventtrigger"
+}
+  

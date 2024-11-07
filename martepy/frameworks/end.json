@@ -1,0 +1,6 @@
+{
+  "EndGAM": "martepy.frameworks.end_gam",
+  "RFileDataSource::FileWriter": "martepy.marte2.datasources.files.file_datasources",
+  "RFileDataSource::FileReader": "martepy.marte2.datasources.files.file_datasources"
+}
+  

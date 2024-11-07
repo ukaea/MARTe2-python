@@ -1,0 +1,16 @@
+{
+  "epicssubscriber": "martepy.marte2.datasources.epics.subscriber",
+  "epicspublisher": "martepy.marte2.datasources.epics.publisher",
+  "filereader": "martepy.marte2.datasources.files.reader",
+  "filewriter": "martepy.marte2.datasources.files.writer",
+  "sdnpublisher": "martepy.marte2.datasources.sdn.publisher",
+  "sdnsubscriber": "martepy.marte2.datasources.sdn.subscriber",
+  "udpreceiver": "martepy.marte2.datasources.udp.receiver",
+  "udpsender": "martepy.marte2.datasources.udp.sender",
+  "GAMDataSource": "martepy.marte2.datasources.gam_datasource",
+  "LinuxTimer": "martepy.marte2.datasources.linux_timer",
+  "LoggerDataSource": "martepy.marte2.datasources.logger_datasource",
+  "Timings": "martepy.marte2.datasources.timing_datasource",
+  "AsyncBridge": "martepy.marte2.datasources.async_bridge"
+}
+  

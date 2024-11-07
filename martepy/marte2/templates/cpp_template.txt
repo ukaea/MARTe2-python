@@ -1,0 +1,64 @@
+/*
+ * @file $file_name
+ * @brief Source file for class $type_name
+ * @date 06/04/2018
+ * @author Andre Neto
+ *
+ * @copyright Copyright 2015 F4E | European Joint Undertaking for ITER and
+ * the Development of Fusion Energy ('Fusion for Energy').
+ * Licensed under the EUPL, Version 1.1 or - as soon they will be approved
+ * by the European Commission - subsequent versions of the EUPL (the "Licence")
+ * You may not use this work except in compliance with the Licence.
+ * You may obtain a copy of the Licence at: http://ec.europa.eu/idabc/eupl
+ *
+ * @warning Unless required by applicable law or agreed to in writing, 
+ * software distributed under the Licence is distributed on an "AS IS"
+ * basis, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express
+ * or implied. See the Licence permissions and limitations under the Licence.
+ * @details This source file contains the definition of all the methods for
+ * the class RTCCcts (public, protected, and private). Be aware that some
+ * methods, such as those inline could be defined on the header file, instead.
+ */
+
+/*---------------------------------------------------------------------------*/
+/*                         Standard header includes                          */
+/*---------------------------------------------------------------------------*/
+
+/*---------------------------------------------------------------------------*/
+/*                         Project header includes                           */
+/*---------------------------------------------------------------------------*/
+#include "AdvancedErrorManagement.h"
+#include "$header_name"
+#include "AnyType.h"
+#include "MessageI.h"
+#include "IntrospectionT.h"
+#include "IntrospectionEntry.h"
+#include "Object.h"
+#include "StreamString.h"
+#include "ClassRegistryDatabase.h"
+
+/*---------------------------------------------------------------------------*/
+/*                           Static definitions                              */
+/*---------------------------------------------------------------------------*/
+
+/*---------------------------------------------------------------------------*/
+/*                           Method definitions                              */
+/*---------------------------------------------------------------------------*/
+
+/*
+ * This cpp file is generated from a template file.
+ * It represents a complex type that, along with other complex types, forms a type
+ * database used in the xMARTe GUI application.
+*/
+
+namespace MARTe {
+
+class $type_name: public MARTe::Object {
+public:
+    CLASS_REGISTER_DECLARATION()
+};
+
+CLASS_REGISTER($type_name, "")
+
+$type_def
+}

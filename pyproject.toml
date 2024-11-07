@@ -1,0 +1,70 @@
+[build-system]
+requires = ["setuptools>=42", "wheel"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "martepy"
+version = "0.1.0"
+description = "Python modules for testing data processing codes"
+readme = "README.md"
+authors = [
+    { name = "Edward Jones", email = "edward.jones1@ukaea.uk" }
+]
+license = { text = "" }  # Add your license here, if any.
+requires-python = ">=3"
+classifiers = [
+    "Programming Language :: Python :: 3"
+]
+dependencies = [
+    "numpy",
+    "pyqt5",
+    "qtpy",
+    "nodeeditor"
+]
+
+[project.urls]
+"Homepage" = "https://git.ccfe.ac.uk/POGDeveloper/martepy"
+
+[tool.setuptools.packages.find]
+include = ["martepy", "martepy.*"]
+
+[tool.setuptools.package-data]
+"martepy.marte2.datasources" = ["*.json", "martepy/marte2/datasources/datasources.json"]
+"martepy.marte2.gams" = ["*.json", "martepy/marte2/gams/gams.json"]
+"martepy.marte2.objects" = ["*.json", "martepy/marte2/objects/objects.json"]
+"martepy.frameworks" = ["*.json", "martepy/frameworks/end.json"]
+"martepy.marte2.templates" = ["*.txt", "martepy/marte2/templates/*.txt"]
+
+[tool.pylint]
+disable = [
+    "C0413",
+    "R0902",
+    "W0102",
+    "R0913",
+    "W0401",
+    "C0302",
+    "R0917",
+    "R0801",
+    "E0611",
+    "R0903",
+    "I1101"
+]
+max-line-length = 100
+ignore = ["tests", "docs", "examples", "build"]
+method-naming-style="camelCase"
+function-naming-style="camelCase"
+variable-naming-style="any"
+class-attribute-naming-style="any"
+argument-naming-style="snake_case"
+
+[tool.coverage.run]
+omit = ["tests/*", "examples/*", "docs/*", ".pytest_cache/*", "htmlcov/*", "public/*"]
+
+[tool.coverage.report]
+omit = ["tests/*", "docs/*"]
+show_missing = true
+precision = 2
+
+[tool.coverage.html]
+directory = "htmlcov"
+title = "Coverage Report for MARTe2 Python"

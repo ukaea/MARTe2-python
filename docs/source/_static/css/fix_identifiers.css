@@ -1,0 +1,13 @@
+/* add a space to fix Breathe+Sphinx rtd_theme with 
+breathe_show_define_initializer  */ 
+
+.sig-name::after { 
+   content: "\00a0";
+}
+
+.wy-nav-content {
+   max-width: 60%;
+}
+
+/* courtesy of https://stackoverflow.com/questions/68733465/missing-space-between-define-and-initializer-sphynx-rtd-theme */
+/* courtesy of https://stackoverflow.com/questions/23211695/modifying-content-width-of-the-sphinx-theme-read-the-docs */
