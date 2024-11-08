@@ -31,5 +31,5 @@ For more general questions on the implementation, contact any of
 .. _`MARTe Discord server`: https://discord.gg/anSXWtnprW
 .. _`Edward Jones`: mailto:edward.jones1@ukaea.uk
 .. _`Hudson Baker`: mailto:hudson.baker@ukaea.uk
-.. _`contributors list on GitLab`: https://git.ccfe.ac.uk/marte21/public/marte2_python/-/graphs/main
+.. _`contributors list on GitLab`: https://github.com/ukaea/MARTe2-python/graphs/contributors
 .. _`Adam Stephen`: mailto:adam.stephen@ukaea.uk

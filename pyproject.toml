@@ -5,7 +5,7 @@ build-backend = "setuptools.build_meta"
 [project]
 name = "martepy"
 version = "1.0.0"
-description = """Python modules that wrap MARTe2 classes and objects into python classes for automation and simplification purposes of developing MARTe2 applications. This also provides tools that are useful for working with MARTe2."""
+description = """This repository provides python classes which represent MARTe2 GAMs, DataSources and applications. Alongside this it provides useful frameworks for debugging and developing applications with MARTe2."""
 readme = "README.md"
 authors = [
     { name = "Edward Jones", email = "edward.jones1@ukaea.uk" }

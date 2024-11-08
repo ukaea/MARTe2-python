@@ -234,4 +234,4 @@ So great! We have used python to generate a MARTe2 configuration and then execut
 Next steps:
 
 - It is encouraged to read up on the `simulation framework <./simulation.html>`_.
-- Alot of operational functions and configurations were ignored in this example, the default set up is usually adequate for an application but you may want to review the other `examples available <https://git.ccfe.ac.uk/marte21/public/marte2_python/-/tree/develop/examples>`_.
+- Alot of operational functions and configurations were ignored in this example, the default set up is usually adequate for an application but you may want to review the other `examples available <https://github.com/ukaea/MARTe2-python/tree/main/examples>`_.

@@ -16,7 +16,7 @@ See also
 - the `MARTe2 source`_, the `MARTe2 components source`_ and the `MARTe2 docs`_
 - the `MARTe2 2019 users meeting`_ and the `training material repository`_
 
-.. _`the source`: https://git.ccfe.ac.uk/marte21/public/marte2_python
+.. _`the source`: https://github.com/ukaea/MARTe2-python
 .. _`MARTe2 source`: https://vcis-gitlab.f4e.europa.eu/aneto/MARTe2
 .. _`MARTe2 components source`: https://vcis-gitlab.f4e.europa.eu/aneto/MARTe2-components
 .. _`MARTe2 docs`: https://vcis.f4e.europa.eu/marte2-docs/master/html

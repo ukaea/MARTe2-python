@@ -32,15 +32,15 @@ pip install martepy
 
 You can find example for how to use this repository here:
 
-[Simple Example](https://marte21.gitpages.ccfe.ac.uk/public/marte2_python/getting_started.html)
+[Simple Example](https://ukaea.github.io/MARTe2-python/getting_started.html)
 
-[Water Tank Example](https://marte21.gitpages.ccfe.ac.uk/public/marte2_python/water_tank.html)
+[Water Tank Example](https://ukaea.github.io/MARTe2-python/water_tank.html)
 
 ## Support
 
 For support on using this codebase you can refer to the documentation found here:
 
-[User Documentation](https://marte21.gitpages.ccfe.ac.uk/public/marte2_python/)
+[User Documentation](https://ukaea.github.io/MARTe2-python/)
 
 If you have found a bug or have a feature request then please submit an issue within this repository.
 
