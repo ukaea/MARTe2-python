@@ -14,7 +14,7 @@ jobs:
     runs-on: ubuntu-latest
     name: Run Tests
     container:
-      image: sudilav1/martepy:latest
+      image: sudilav1/martepy:main
     steps:
       - name: Checkout repository
         uses: actions/checkout@v2
@@ -32,7 +32,7 @@ jobs:
     runs-on: ubuntu-latest
     name: Code Linting
     container:
-      image: sudilav1/martepy:latest
+      image: sudilav1/martepy:main
     steps:
       - name: Checkout repository
         uses: actions/checkout@v2
