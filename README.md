@@ -22,7 +22,7 @@ When you require support please open an issue, if you would like to make adjustm
 
 ## Installation
 
-This repo has few dependencies and should auto install these when needed. To install the repo simply clone and install with pip:
+This repo has few dependencies and should auto install these when needed. To install the repo simply install via pip:
 
 ``` bash
 pip install martepy
