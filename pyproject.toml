@@ -4,8 +4,8 @@ build-backend = "setuptools.build_meta"
 
 [project]
 name = "martepy"
-version = "0.1.0"
-description = "Python modules for testing data processing codes"
+version = "1.0.0"
+description = """Python modules that wrap MARTe2 classes and objects into python classes for automation and simplification purposes of developing MARTe2 applications. This also provides tools that are useful for working with MARTe2."""
 readme = "README.md"
 authors = [
     { name = "Edward Jones", email = "edward.jones1@ukaea.uk" }
@@ -23,7 +23,7 @@ dependencies = [
 ]
 
 [project.urls]
-"Homepage" = "https://git.ccfe.ac.uk/POGDeveloper/martepy"
+"Homepage" = "https://github.com/ukaea/MARTe2-python"
 
 [tool.setuptools.packages.find]
 include = ["martepy", "martepy.*"]

@@ -18,16 +18,14 @@ When you require support please open an issue, if you would like to make adjustm
 
 **Note: You must comply with our guidelines as per the below.**
 
-[Repository Guidelines](./Guidelines.md)
+[Repository Guidelines](https://github.com/ukaea/MARTe2-python/blob/main/Guidelines.md)
 
 ## Installation
 
 This repo has few dependencies and should auto install these when needed. To install the repo simply clone and install with pip:
 
 ``` bash
-git clone https://git.ccfe.ac.uk/marte21/public/marte2_python.git
-cd marte2_python
-pip install ./
+pip install martepy
 ```
 
 ## Examples
