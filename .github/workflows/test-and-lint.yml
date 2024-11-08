@@ -20,9 +20,9 @@ jobs:
         uses: actions/checkout@v2
       - name: Run pytest
         run: |
-          pytest --cov=martepy --cov-report=term --cov-report=html:cov_html --cov-fail-under=90
+          pytest --cov=martepy --cov-report=term --cov-report=html:cov_html --cov-fail-under=90 --junit-xml=test_report.xml
       - name: Upload Coverage Report
-        uses: actions/upload-artifact@v2
+        uses: actions/upload-artifact@v4.4.3
         with:
           name: coverage-report
           path: cov_html/
