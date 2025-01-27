@@ -72,13 +72,13 @@ app.add(functions = functions)
 app.add(states = [
     MARTe2RealTimeState(
         configuration_name = '+Running',
-        threads = [
+        threads = MARTe2ReferenceContainer("Threads", [
             MARTe2RealTimeThread(
                 configuration_name = '+Thread0',
                 cpu_mask = int(cpu_thread_gen(1), 16),
                 functions = functions,
             ),
-        ],
+        ]),
     ),
 ])
 
@@ -131,7 +131,7 @@ startmessages = [prepare] + [MARTe2Message("+StartNextStateExecutionMsg","App","
 
 ''' Note the below is necessary for the HTTPService to be running if you are using one. '''
 
-startmessages += [MARTe2Message("+StartHttpService", "WebService", "Start",None,"")]
+startmessages += [MARTe2Message("+StartHttpService", "WebService", "Start",MARTe2ConfigurationDatabase(),"")]
 event = MARTe2StateMachineEvent('+START',"RUNNING","ERROR",0,startmessages)
 
 currentstate = MARTe2ReferenceContainer("+INITIALISING",[event])
@@ -173,7 +173,6 @@ app.add(externals=[statemachine])
 app.add(states = [
     MARTe2RealTimeState(
         configuration_name = '+ErrorState',
-        threads = [],
     ),
 ])
 
