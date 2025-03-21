@@ -172,6 +172,14 @@ Now our application is defined your can build the configuration to return a stri
 
 This example can be found in the examples folder as `timer_logger.py` with cfg output file `timer_logger_example.cfg`.
 
+You can then run the example via:
+
+.. code:: bash
+
+    /opt/MARTe2/MARTe2/Build/x86-linux/App/MARTeApp.ex -l RealTimeLoader -f timer_logger_example.cfg -s Running
+
+(Or wherever your MARTeApp instance is).
+
 Next steps:
 
 - Review the `water tank example <./water_tank.html>`_.
