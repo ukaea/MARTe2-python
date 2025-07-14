@@ -122,7 +122,7 @@ def addComboEdit(mainpanel_instance, node, lbl_name, para_name, row, col_start, 
     mainpanel_instance.configbarBox.addWidget(wgt_label, row, col_start)
     mainpanel_instance.configbarBox.addWidget(wgt_field, row, col_start+1)
 
-def addSignalsSection(mainpanel_instance, node, default=False, epics=False, type_input=False):
+def addSignalsSection(mainpanel_instance, node, default=False, epics=False, type_input=False, buses=False):
     ''' Adds a generic signal selection section to a node panel '''
     lbl_wgt = QLabel("Number of signals: ")
     no_signals_wgt = QLineEdit(mainpanel_instance)
@@ -140,7 +140,13 @@ def addSignalsSection(mainpanel_instance, node, default=False, epics=False, type
     colcount = 2
     if not type_input:
         def runWindow():
-            config_signals = SignalWdw(mainpanel_instance, node, default, epics)
+            bus = False
+            if buses:
+                # Now we need to check the actual configuration - this is specifically for the SimulinkWrapperGAM
+                if node.parameters["busmode"] == 'Structured':
+                    # Then we need to change the signal window to be a bus configuration window
+                    bus = True
+            config_signals = SignalWdw(mainpanel_instance, node, default, epics, buses=bus)
             node.application.newwindow = config_signals
             config_signals.show()
         config_btn = QPushButton("Configure Signals")
@@ -152,7 +158,7 @@ def addSignalsSection(mainpanel_instance, node, default=False, epics=False, type
     mainpanel_instance.configbarBox.addWidget(spacerwgt, 1, colcount)
 
 def addInputSignalsSection(mainpanel_instance, node, pack=True, samples=False,
-                           datasource=None, epics=False):
+                           datasource=None, epics=False, buses=False):
     ''' Add an input signal selection item to a node panel '''
     lbl_wgt = QLabel("Number of input signals: ")
     no_signals_wgt = QLineEdit(mainpanel_instance)
@@ -165,7 +171,13 @@ def addInputSignalsSection(mainpanel_instance, node, pack=True, samples=False,
     mainpanel_instance.configbarBox.addWidget(no_signals_wgt, 1, 1)
     # Default means we're probably a constant GAM
     def runWindow():
-        config_signals = SignalWdw(mainpanel_instance, node, False, epics, samples,'input')
+        bus = False
+        if buses:
+            # Now we need to check the actual configuration - this is specifically for the SimulinkWrapperGAM
+            if node.parameters["busmode"] == 'Structured':
+                # Then we need to change the signal window to be a bus configuration window
+                bus = True
+        config_signals = SignalWdw(mainpanel_instance, node, False, epics, samples,'input', buses=bus)
         node.application.newwindow = config_signals
         config_signals.show()
 
@@ -178,7 +190,7 @@ def addInputSignalsSection(mainpanel_instance, node, pack=True, samples=False,
         mainpanel_instance.configbarBox.addWidget(spacerwgt, 1, 2)
 
 def addOutputSignalsSection(mainpanel_instance, node, start = 0, pack=True, datasource=None,
-                            samples=False, default=False, epics=False):
+                            samples=False, default=False, epics=False, buses=False):
     ''' Add an output signal selection item to a node panel. '''
     # Note if samples is set, we'll start from row 2 for cleanliness
     lbl_wgt = QLabel("Number of output signals: ")
@@ -192,7 +204,13 @@ def addOutputSignalsSection(mainpanel_instance, node, start = 0, pack=True, data
     mainpanel_instance.configbarBox.addWidget(lbl_wgt, rowstart, start)
     mainpanel_instance.configbarBox.addWidget(no_signals_wgt, rowstart, start+1)
     def runWindow():
-        config_signals = SignalWdw(mainpanel_instance, node, default, epics, samples)
+        bus = False
+        if buses:
+            # Now we need to check the actual configuration - this is specifically for the SimulinkWrapperGAM
+            if node.parameters["busmode"] == 'Structured':
+                # Then we need to change the signal window to be a bus configuration window
+                bus = True
+        config_signals = SignalWdw(mainpanel_instance, node, default, epics, samples, buses=bus)
         node.application.newwindow = config_signals
         config_signals.show()
     config_btn = QPushButton("Configure Signals")

@@ -10,6 +10,7 @@
   "waveformchirp": "martepy.marte2.gams.waveform_chirp",
   "waveformpoints": "martepy.marte2.gams.waveform_points",
   "pid": "martepy.marte2.gams.pid",
-  "filter": "martepy.marte2.gams.filter"
+  "filter": "martepy.marte2.gams.filter",
+  "simulink": "martepy.marte2.gams.simulink_gam"
 }
   

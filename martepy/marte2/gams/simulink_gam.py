@@ -1,0 +1,299 @@
+''' Pythonic representation of the Expression GAM'''
+from collections import defaultdict
+from functools import partial
+import copy
+
+from PyQt5.QtWidgets import (
+    QTextEdit,
+    QLabel,
+    QPushButton
+)
+
+from martepy.marte2.gam import MARTe2GAM
+from martepy.marte2.qt_functions import addInputSignalsSection, addOutputSignalsSection, paraChange, addComboEdit, addLineEdit
+from martepy.functions.extra_functions import normalizeSignal
+class SimulinkGAM(MARTe2GAM):
+    ''' Pythonic representation of the Expression GAM'''
+    def __init__(self,
+                    configuration_name: str = 'SimulinkWrapperGAM',
+                    input_signals: list = [],
+                    output_signals: list = [],
+                    library: str = '',
+                    symbol_prefix: str = '',
+                    Verbosity: int = 0,
+                    SkipInvalidTunableParams: int = 0,
+                    EnforceModelSignalCoverage: int = 0,
+                    TunableParamExternalSource: str = '',
+                    NonVirtualBusMode: str = 'Structured',
+                ):
+        self.library = library
+        self.symbol_prefix = symbol_prefix
+        self.verbosity = Verbosity
+        self.skipinvalid = SkipInvalidTunableParams
+        self.enforcesignalcoverage = EnforceModelSignalCoverage
+        self.tunablesource = TunableParamExternalSource
+        self.busmode = NonVirtualBusMode
+        self.parameters = []
+        super().__init__(
+                configuration_name = configuration_name,
+                class_name = 'SimulinkWrapperGAM',
+                input_signals = input_signals,
+                output_signals = output_signals,
+            )
+
+    def writeGamConfig(self, config_writer):
+        ''' Write the GAM configuration - i.e. the expression '''
+        config_writer.writeNode('Library', f'"{self.library}"')
+        config_writer.writeNode('SymbolPrefix', f'"{self.symbol_prefix}"')
+        config_writer.writeNode('Verbosity', f'"{self.verbosity}"')
+        config_writer.writeNode('SkipInvalidTunableParams', f'"{self.skipinvalid}"')
+        config_writer.writeNode('EnforceModelSignalCoverage', f'"{self.enforcesignalcoverage}"')
+        if(self.parameters):
+            config_writer.writeNode('TunableParamExternalSource', f'"{self.tunablesource}"')
+        config_writer.writeNode('NonVirtualBusMode', f'"{self.busmode}"')
+
+    # Groups our signals by bus for outputting
+    def group_by_bus(self, items):
+        grouped = defaultdict(list)
+
+        for name, info in items:
+            bus = info.get('Bus', None)
+            grouped[bus].append((name, info))
+
+        result = []
+        for bus in sorted(grouped.keys(), key=lambda x: str(x)):
+            result.extend(grouped[bus])
+
+        return result
+
+    def writeBuses(self, config_writer, ordered_by_bus):
+        if not ordered_by_bus:
+            return  # nothing to process
+        
+        current_bus = None
+
+        for idx, (name, info) in enumerate(ordered_by_bus):
+            bus = info.get('Bus')
+
+            if bus != current_bus:
+                if current_bus is not None:
+                    config_writer.endSection(current_bus)
+                config_writer.startSection(bus)
+                current_bus = bus
+
+            config_writer.startSection(name)
+            signal_details = normalizeSignal(copy.deepcopy(info))
+
+            for key, value in signal_details['MARTeConfig'].items():
+                if not(key == 'Bus') and not(key == 'Alias'):
+                    config_writer.writeNode(key, value)
+            config_writer.endSection(name)
+
+        # After loop, end the last section
+        if current_bus is not None:
+            config_writer.endSection(current_bus)
+    # May want to override this function to allow bus definitions and parameters
+    def write(self, config_writer):
+        ''' Write the total GAM configuration '''
+        config_writer.startClass('+' + self.configuration_name.lstrip('+'), self.class_name)
+        self.writeGamConfig(config_writer)
+        if self.input_signals:
+            config_writer.startSection('InputSignals')
+            if self.busmode == 'Structured':
+                ordered_by_bus = self.group_by_bus(self.input_signals)
+                self.writeBuses(self, config_writer, ordered_by_bus)
+            else:
+                self.writeSignals(self.input_signals, config_writer)
+            config_writer.endSection('InputSignals')
+        if self.output_signals:
+            config_writer.startSection('OutputSignals')
+            if self.busmode == 'Structured':
+                ordered_by_bus = self.group_by_bus(self.output_signals)
+                self.writeBuses(self, config_writer, ordered_by_bus)
+            else:
+                self.writeSignals(self.output_signals, config_writer)
+            config_writer.endSection('OutputSignals')
+        config_writer.endSection('+' + self.configuration_name.lstrip('+'))
+        # Print parameters section as Ref container
+
+    def serialize(self):
+        ''' Serialize the object '''
+        res = super().serialize()
+        res['parameters']['library'] = self.library
+        res['parameters']['symbol_prefix'] = self.symbol_prefix
+        res['parameters']['verbosity'] = self.verbosity
+        res['parameters']['skipinvalid'] = self.skipinvalid
+        res['parameters']['enforcesignalcoverage'] = self.enforcesignalcoverage
+        res['parameters']['tunablesource'] = self.tunablesource
+        res['parameters']['busmode'] = self.busmode
+        res['parameters']['Class name'] = 'SimulinkWrapperGAM'
+        res['parameters']['parameters'] = self.parameters
+        res['label'] = "SimulinkWrapperGAM"
+        res['block_type'] = 'SimulinkWrapperGAM'
+        res['class_name'] = 'SimulinkWrapperGAM'
+        res['title'] = f"{self.configuration_name} (SimulinkWrapperGAM)"
+        return res
+
+    def deserialize(self, data: dict, hashmap: dict={}, restore_id: bool=True) -> bool:
+        ''' Deserialize the given object to our class instance '''
+        res = super().deserialize(data, hashmap, restore_id)
+        self.library = data['parameters']["library"]
+        self.symbol_prefix = data['parameters']["symbol_prefix"]
+        self.verbosity = data['parameters']["verbosity"]
+        self.skipinvalid = data['parameters']["skipinvalid"]
+        self.enforcesignalcoverage = data['parameters']["enforcesignalcoverage"]
+        self.tunablesource = data['parameters']["tunablesource"]
+        self.busmode = data['parameters']["busmode"]
+        self.parameters = data['parameters']['parameters']
+        return res
+
+    @staticmethod
+    def open_define_parameters_dialog(node):
+        dialog = DefineParametersDialog(node)
+        dialog.exec_()
+
+    @staticmethod
+    def loadParameters(mainpanel_instance, node):
+        """This function is intended to be for the GUI where it can
+        call the static instance of the class directly to generate
+        the appropriate parameter modifier for the node in XMARTe2.
+        """
+        app_def = mainpanel_instance.parent.API.getServiceByName('ApplicationDefinition')
+        datasource = app_def.configuration['misc']['gamsources'][0]
+        addInputSignalsSection(mainpanel_instance, node, False, buses=True)
+
+        addOutputSignalsSection(mainpanel_instance, node, 3, False, datasource=datasource, buses=True)
+
+
+        # Define Parameters
+
+        addLineEdit(mainpanel_instance, node, "Library: ", 'library', 3, 0)
+        addLineEdit(mainpanel_instance, node, "SymbolPrefix: ", 'symbol_prefix', 3, 2)
+
+        addComboEdit(mainpanel_instance, node, "Verbosity:",
+                     "verbosity", 4, 0, ['2', '1', '0'])
+        addComboEdit(mainpanel_instance, node, "SkipInvalidTunableParams:",
+                     "skipinvalid", 4, 2, ['1', '0'])
+        addComboEdit(mainpanel_instance, node, "EnforceModelSignalCoverage:",
+                     "enforcesignalcoverage", 5, 0, ['1', '0'])
+        
+        addLineEdit(mainpanel_instance, node, "TunableParamExternalSource: ", 'tunablesource', 5, 2)
+
+        addComboEdit(mainpanel_instance, node, "NonVirtualBusMode:",
+                     "busmode", 6, 0, ['ByteArray', 'Structured'])
+        
+        btn_define_params = QPushButton("Define Parameters")
+        btn_define_params.clicked.connect(partial(SimulinkGAM.open_define_parameters_dialog, node))
+        mainpanel_instance.configbarBox.addWidget(btn_define_params, 6, 2)
+
+def initialize(factory, plugin_datastore) -> None:
+    ''' Initialize the object with the factory '''
+    factory.registerBlock("SimulinkGAM", SimulinkGAM, plugin_datastore)
+    factory.registerBlock("SimulinkWrapperGAM", SimulinkGAM, plugin_datastore)
+
+from PyQt5.QtWidgets import (
+    QDialog, QVBoxLayout, QHBoxLayout, QTableWidget, QTableWidgetItem,
+    QPushButton, QComboBox, QAbstractItemView, QHeaderView, QWidget
+)
+from PyQt5.QtCore import Qt, QSize
+from PyQt5.QtGui import QGuiApplication
+
+class DefineParametersDialog(QDialog):
+    TYPE_OPTIONS = ['uint8', 'int8', 'uint16', 'int16', 'uint32', 'int32', 'float32', 'float64']
+
+    def __init__(self, node):
+        super().__init__()
+        self.node = node
+        self.setWindowTitle("Define Parameters")
+        self.init_ui()
+        self.load_existing_parameters()
+
+    def init_ui(self):
+        self.setMinimumSize(QSize(self.screen_width() * 0.3, self.screen_height() * 0.5))
+        self.setModal(True)
+
+        layout = QVBoxLayout(self)
+
+        # Top bar with Add and Delete
+        top_bar = QHBoxLayout()
+        top_bar.addStretch()
+        self.btn_add = QPushButton("Add")
+        self.btn_delete = QPushButton("Delete")
+        top_bar.addWidget(self.btn_add)
+        top_bar.addWidget(self.btn_delete)
+        layout.addLayout(top_bar)
+
+        # Table
+        self.table = QTableWidget(0, 3)
+        self.table.setHorizontalHeaderLabels(['Parameter Name', 'Type', 'Presets'])
+        self.table.horizontalHeader().setStretchLastSection(True)
+        self.table.setSelectionBehavior(QAbstractItemView.SelectRows)
+        self.table.setEditTriggers(QTableWidget.DoubleClicked | QTableWidget.EditKeyPressed)
+        self.table.verticalHeader().setVisible(False)
+        layout.addWidget(self.table)
+
+        # Bottom bar with Cancel and Apply
+        bottom_bar = QHBoxLayout()
+        bottom_bar.addStretch()
+        self.btn_cancel = QPushButton("Cancel")
+        self.btn_apply = QPushButton("Apply")
+        bottom_bar.addWidget(self.btn_cancel)
+        bottom_bar.addWidget(self.btn_apply)
+        layout.addLayout(bottom_bar)
+
+        # Connections
+        self.btn_add.clicked.connect(self.add_row)
+        self.btn_delete.clicked.connect(self.delete_selected_row)
+        self.btn_cancel.clicked.connect(self.reject)
+        self.btn_apply.clicked.connect(self.apply_changes)
+
+    def screen_width(self):
+        return QGuiApplication.primaryScreen().geometry().width()
+
+    def screen_height(self):
+        return QGuiApplication.primaryScreen().geometry().height()
+
+    def load_existing_parameters(self):
+        self.table.setRowCount(0)
+        param_list = self.node.parameters.get('parameters', [])
+        for param in param_list:
+            self.add_row(param.get('parameter_name', ''), param.get('type', ''), param.get('presets', ''))
+
+    def add_row(self, name='', type_str='uint8', presets=''):
+        row = self.table.rowCount()
+        self.table.insertRow(row)
+
+        self.table.setItem(row, 0, QTableWidgetItem(name))
+
+        combo = QComboBox()
+        combo.addItems(self.TYPE_OPTIONS)
+        if type_str in self.TYPE_OPTIONS:
+            combo.setCurrentText(type_str)
+        self.table.setCellWidget(row, 1, combo)
+
+        self.table.setItem(row, 2, QTableWidgetItem(presets))
+
+    def delete_selected_row(self):
+        selected = self.table.selectionModel().selectedRows()
+        for index in sorted(selected, reverse=True):
+            self.table.removeRow(index.row())
+
+    def apply_changes(self):
+        self.node.parameters['parameters'] = []
+        for row in range(self.table.rowCount()):
+            name_item = self.table.item(row, 0)
+            presets_item = self.table.item(row, 2)
+            type_widget = self.table.cellWidget(row, 1)
+
+            name = name_item.text() if name_item else ''
+            presets = presets_item.text() if presets_item else ''
+            type_str = type_widget.currentText() if type_widget else 'uint8'
+
+            param_dict = {
+                'parameter_name': name,
+                'type': type_str,
+                'presets': presets
+            }
+            self.node.parameters['parameters'].append(param_dict)
+
+        self.accept()

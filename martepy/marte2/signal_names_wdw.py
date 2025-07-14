@@ -24,13 +24,14 @@ from martepy.functions.extra_functions import getname
 class SignalWdw(QMainWindow):
     ''' The configurable signal window where the user can configure signals in XMARTe2. '''
     def __init__(self, parent=None, node=None, hasdefault=False, epics=False,
-                 samples=False, io='output'):
+                 samples=False, io='output', buses=False):
         if node is None:
             raise ValueError("Node cannot be null")
         super().__init__(parent)
         self.node = node
         self.to_delete = []
         self.epics = epics
+        self.bus = buses
         self.samples = samples
         self.io = io
         self.app = node.application.app
@@ -48,7 +49,6 @@ class SignalWdw(QMainWindow):
         self.signal_tbl.setRowCount(len(signals))
         headers = ["Signal Name", "Datasource", "Type",
                    "NumberOfDimensions", "NumberOfElements", 'Alias']
-
 
         self.is_datasource = isinstance(self.node.application.API.toGAM(self.node),
                                                        MARTe2DataSource)
@@ -101,6 +101,10 @@ class SignalWdw(QMainWindow):
     def handleAdditionalHeaders(self, headers):
         ''' Handle whether we need additional headers '''
         header_cnt = 0
+        if self.bus:
+            # Don't add to header_cnt as we replace Alias instead
+            headers = headers[:-1]
+            headers = ['Bus']
         if self.default:
             headers += ['Default']
             header_cnt += 1
@@ -136,8 +140,12 @@ class SignalWdw(QMainWindow):
         self.signal_tbl.setItem(row_num, 3, QTableWidgetItem(dimensions))
         self.signal_tbl.setItem(row_num, 4, QTableWidgetItem(elements))
         # Set the alias
-        alias = getSetKey('Alias', signal[0])
-        self.signal_tbl.setItem(row_num, 5, QTableWidgetItem(alias))
+        if self.bus:
+            bus = getSetKey('Bus', signal[0])
+            self.signal_tbl.setItem(row_num, 5, QTableWidgetItem(bus))
+        else:
+            alias = getSetKey('Alias', signal[0])
+            self.signal_tbl.setItem(row_num, 5, QTableWidgetItem(alias))
         colcount = 6
         if self.default:
             default = getSetKey('Default', '{1}')
@@ -248,7 +256,10 @@ class SignalWdw(QMainWindow):
             config['MARTeConfig']['Type'] = self.signal_tbl.item(row, 2).text()
             config['MARTeConfig']['NumberOfDimensions'] = self.signal_tbl.item(row, 3).text()
             config['MARTeConfig']['NumberOfElements'] = self.signal_tbl.item(row, 4).text()
-            config['MARTeConfig']['Alias'] = self.signal_tbl.item(row, 5).text()
+            if self.bus:
+                config['MARTeConfig']['Bus'] = self.signal_tbl.item(row, 5).text()
+            else:
+                config['MARTeConfig']['Alias'] = self.signal_tbl.item(row, 5).text()
             colcount = 6
             if self.default:
                 config['MARTeConfig']['Default'] = self.signal_tbl.item(row, colcount).text()
@@ -263,7 +274,7 @@ class SignalWdw(QMainWindow):
                 try:
                     socket_idx = edge.end_socket.node.inputs.index(edge.end_socket)
                     inputsb = edge.end_socket.node.inputsb[socket_idx]
-                    inputsb[1]['MARTeConfig']['Alias'] = self.signal_tbl.item(row, 5).text()
+                    inputsb[1]['MARTeConfig']['Alias'] = self.signal_tbl.item(row, 0).text()
                     inputsb[1]['MARTeConfig']['DataSource'] = self.signal_tbl.item(row, 1).text()
                     edge.end_socket.node.updateSocketPositions()
                 except AttributeError:
