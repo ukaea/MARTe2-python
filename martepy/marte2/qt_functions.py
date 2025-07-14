@@ -85,6 +85,12 @@ def textChangeOut(wdgt, node, default, epics, type_input, datasource=None, # pyl
 
         node.content.updateDim()
 
+def getSetKey(signal, key, default_val):
+    ''' Check that a key exists and if not, create it '''
+    if key not in list(signal['MARTeConfig'].keys()):
+        signal['MARTeConfig'][key] = default_val
+    return signal['MARTeConfig'][key]
+
 def paraChange(value, node, parameter) -> None:
     ''' Update our parameter when there has been a change, this should be connected
     to line edit/comboedit items that are used in the GUI representation of a node. '''

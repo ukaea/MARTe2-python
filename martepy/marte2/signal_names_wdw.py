@@ -102,18 +102,17 @@ class SignalWdw(QMainWindow):
         ''' Handle whether we need additional headers '''
         header_cnt = 0
         if self.bus:
-            # Don't add to header_cnt as we replace Alias instead
-            headers = headers[:-1]
-            headers = ['Bus']
+            # Remove the last item in-place instead of slicing
+            headers.append('Bus')
+            header_cnt += 1
         if self.default:
-            headers += ['Default']
+            headers.append('Default')
             header_cnt += 1
         if self.epics:
-            headers += ["PVName"]
+            headers.append('PVName')
             header_cnt += 1
-
         if self.samples:
-            headers += ['Samples']
+            headers.append('Samples')
             header_cnt += 1
         return header_cnt
 
@@ -140,13 +139,13 @@ class SignalWdw(QMainWindow):
         self.signal_tbl.setItem(row_num, 3, QTableWidgetItem(dimensions))
         self.signal_tbl.setItem(row_num, 4, QTableWidgetItem(elements))
         # Set the alias
+        alias = getSetKey('Alias', signal[0])
+        self.signal_tbl.setItem(row_num, 5, QTableWidgetItem(alias))
+        colcount = 6
         if self.bus:
             bus = getSetKey('Bus', signal[0])
-            self.signal_tbl.setItem(row_num, 5, QTableWidgetItem(bus))
-        else:
-            alias = getSetKey('Alias', signal[0])
-            self.signal_tbl.setItem(row_num, 5, QTableWidgetItem(alias))
-        colcount = 6
+            self.signal_tbl.setItem(row_num, colcount, QTableWidgetItem(bus))
+            colcount += 1
         if self.default:
             default = getSetKey('Default', '{1}')
             self.signal_tbl.setItem(row_num, colcount, QTableWidgetItem(default))
@@ -256,11 +255,11 @@ class SignalWdw(QMainWindow):
             config['MARTeConfig']['Type'] = self.signal_tbl.item(row, 2).text()
             config['MARTeConfig']['NumberOfDimensions'] = self.signal_tbl.item(row, 3).text()
             config['MARTeConfig']['NumberOfElements'] = self.signal_tbl.item(row, 4).text()
-            if self.bus:
-                config['MARTeConfig']['Bus'] = self.signal_tbl.item(row, 5).text()
-            else:
-                config['MARTeConfig']['Alias'] = self.signal_tbl.item(row, 5).text()
+            config['MARTeConfig']['Alias'] = self.signal_tbl.item(row, 5).text()
             colcount = 6
+            if self.bus:
+                config['MARTeConfig']['Bus'] = self.signal_tbl.item(row, colcount).text()
+                colcount += 1
             if self.default:
                 config['MARTeConfig']['Default'] = self.signal_tbl.item(row, colcount).text()
                 colcount += 1

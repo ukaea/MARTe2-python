@@ -10,7 +10,7 @@ from PyQt5.QtWidgets import (
 )
 
 from martepy.marte2.gam import MARTe2GAM
-from martepy.marte2.qt_functions import addInputSignalsSection, addOutputSignalsSection, paraChange, addComboEdit, addLineEdit
+from martepy.marte2.qt_functions import addInputSignalsSection, addOutputSignalsSection, paraChange, addComboEdit, addLineEdit, getSetKey
 from martepy.functions.extra_functions import normalizeSignal
 class SimulinkGAM(MARTe2GAM):
     ''' Pythonic representation of the Expression GAM'''
@@ -57,7 +57,7 @@ class SimulinkGAM(MARTe2GAM):
         grouped = defaultdict(list)
 
         for name, info in items:
-            bus = info.get('Bus', None)
+            bus = getSetKey(info, 'Bus', '')
             grouped[bus].append((name, info))
 
         result = []
@@ -73,7 +73,7 @@ class SimulinkGAM(MARTe2GAM):
         current_bus = None
 
         for idx, (name, info) in enumerate(ordered_by_bus):
-            bus = info.get('Bus')
+            bus = getSetKey(info, 'Bus', '')
 
             if bus != current_bus:
                 if current_bus is not None:
@@ -101,7 +101,7 @@ class SimulinkGAM(MARTe2GAM):
             config_writer.startSection('InputSignals')
             if self.busmode == 'Structured':
                 ordered_by_bus = self.group_by_bus(self.input_signals)
-                self.writeBuses(self, config_writer, ordered_by_bus)
+                self.writeBuses(config_writer, ordered_by_bus)
             else:
                 self.writeSignals(self.input_signals, config_writer)
             config_writer.endSection('InputSignals')
@@ -109,12 +109,19 @@ class SimulinkGAM(MARTe2GAM):
             config_writer.startSection('OutputSignals')
             if self.busmode == 'Structured':
                 ordered_by_bus = self.group_by_bus(self.output_signals)
-                self.writeBuses(self, config_writer, ordered_by_bus)
+                self.writeBuses(config_writer, ordered_by_bus)
             else:
                 self.writeSignals(self.output_signals, config_writer)
             config_writer.endSection('OutputSignals')
         config_writer.endSection('+' + self.configuration_name.lstrip('+'))
         # Print parameters section as Ref container
+        if self.parameters:
+            config_writer.startSection('Parameters')
+            for param in self.parameters:
+                # param.get('parameter_name', ''), param.get('type', ''), param.get('presets', '')
+                line = f'{param['parameter_name']} = ({param['type']}) {param['presets']}'
+                config_writer.writeBareLine(line)
+            config_writer.endSection('Parameters')
 
     def serialize(self):
         ''' Serialize the object '''
@@ -209,7 +216,7 @@ class DefineParametersDialog(QDialog):
         self.load_existing_parameters()
 
     def init_ui(self):
-        self.setMinimumSize(QSize(self.screen_width() * 0.3, self.screen_height() * 0.5))
+        self.setMinimumSize(QSize(int(self.screen_width() * 0.3), int(self.screen_height() * 0.5)))
         self.setModal(True)
 
         layout = QVBoxLayout(self)
