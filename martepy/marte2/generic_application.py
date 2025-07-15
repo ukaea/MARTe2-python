@@ -254,6 +254,9 @@ signal/alias: {string} in datasource {datasource_name}"""))
             # A datasource must be read/written in each state
             for input_signal in datasource.input_signals:
                 for state in self.states:
+                    # Ignore if not functions in this state
+                    if all(len(thread.functions) == 0 for thread in state.threads.objects):
+                        continue
                     if not any(((sinput[1]['MARTeConfig']['DataSource'] ==
                                  datasource.configuration_name.lstrip('+') and
                                  getAlias(sinput) == getAlias(input_signal) for

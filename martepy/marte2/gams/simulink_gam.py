@@ -19,20 +19,20 @@ class SimulinkGAM(MARTe2GAM):
                     input_signals: list = [],
                     output_signals: list = [],
                     library: str = '',
-                    symbol_prefix: str = '',
+                    symbolprefix: str = '',
                     Verbosity: int = 0,
-                    SkipInvalidTunableParams: int = 0,
+                    skipinvalidtunableparamsTunableParams: int = 0,
                     EnforceModelSignalCoverage: int = 0,
                     TunableParamExternalSource: str = '',
-                    NonVirtualBusMode: str = 'Structured',
+                    NonVirtualnonvirtualbusmode: str = 'Structured',
                 ):
         self.library = library
-        self.symbol_prefix = symbol_prefix
+        self.symbolprefix = symbolprefix
         self.verbosity = Verbosity
-        self.skipinvalid = SkipInvalidTunableParams
-        self.enforcesignalcoverage = EnforceModelSignalCoverage
-        self.tunablesource = TunableParamExternalSource
-        self.busmode = NonVirtualBusMode
+        self.skipinvalidtunableparamstunableparams = skipinvalidtunableparamsTunableParams
+        self.enforcemodelsignalcoverage = EnforceModelSignalCoverage
+        self.tunableparamexternalsource = TunableParamExternalSource
+        self.nonvirtualnonvirtualbusmode = NonVirtualnonvirtualbusmode
         self.parameters = []
         super().__init__(
                 configuration_name = configuration_name,
@@ -44,13 +44,13 @@ class SimulinkGAM(MARTe2GAM):
     def writeGamConfig(self, config_writer):
         ''' Write the GAM configuration - i.e. the expression '''
         config_writer.writeNode('Library', f'"{self.library}"')
-        config_writer.writeNode('SymbolPrefix', f'"{self.symbol_prefix}"')
+        config_writer.writeNode('SymbolPrefix', f'"{self.symbolprefix}"')
         config_writer.writeNode('Verbosity', f'"{self.verbosity}"')
-        config_writer.writeNode('SkipInvalidTunableParams', f'"{self.skipinvalid}"')
-        config_writer.writeNode('EnforceModelSignalCoverage', f'"{self.enforcesignalcoverage}"')
+        config_writer.writeNode('skipinvalidtunableparamsTunableParams', f'"{self.skipinvalidtunableparams}"')
+        config_writer.writeNode('EnforceModelSignalCoverage', f'"{self.enforcemodelsignalcoverage}"')
         if(self.parameters):
-            config_writer.writeNode('TunableParamExternalSource', f'"{self.tunablesource}"')
-        config_writer.writeNode('NonVirtualBusMode', f'"{self.busmode}"')
+            config_writer.writeNode('TunableParamExternalSource', f'"{self.tunableparamexternalsource}"')
+        config_writer.writeNode('NonVirtualnonvirtualbusmode', f'"{self.nonvirtualbusmode}"')
 
     # Groups our signals by bus for outputting
     def group_by_bus(self, items):
@@ -99,7 +99,7 @@ class SimulinkGAM(MARTe2GAM):
         self.writeGamConfig(config_writer)
         if self.input_signals:
             config_writer.startSection('InputSignals')
-            if self.busmode == 'Structured':
+            if self.nonvirtualbusmode == 'Structured':
                 ordered_by_bus = self.group_by_bus(self.input_signals)
                 self.writeBuses(config_writer, ordered_by_bus)
             else:
@@ -107,13 +107,13 @@ class SimulinkGAM(MARTe2GAM):
             config_writer.endSection('InputSignals')
         if self.output_signals:
             config_writer.startSection('OutputSignals')
-            if self.busmode == 'Structured':
+            if self.nonvirtualbusmode == 'Structured':
                 ordered_by_bus = self.group_by_bus(self.output_signals)
                 self.writeBuses(config_writer, ordered_by_bus)
             else:
                 self.writeSignals(self.output_signals, config_writer)
             config_writer.endSection('OutputSignals')
-        config_writer.endSection('+' + self.configuration_name.lstrip('+'))
+        
         # Print parameters section as Ref container
         if self.parameters:
             config_writer.startSection('Parameters')
@@ -123,16 +123,18 @@ class SimulinkGAM(MARTe2GAM):
                 config_writer.writeBareLine(line)
             config_writer.endSection('Parameters')
 
+        config_writer.endSection('+' + self.configuration_name.lstrip('+'))
+
     def serialize(self):
         ''' Serialize the object '''
         res = super().serialize()
         res['parameters']['library'] = self.library
-        res['parameters']['symbol_prefix'] = self.symbol_prefix
+        res['parameters']['symbolprefix'] = self.symbolprefix
         res['parameters']['verbosity'] = self.verbosity
-        res['parameters']['skipinvalid'] = self.skipinvalid
-        res['parameters']['enforcesignalcoverage'] = self.enforcesignalcoverage
-        res['parameters']['tunablesource'] = self.tunablesource
-        res['parameters']['busmode'] = self.busmode
+        res['parameters']['skipinvalidtunableparams'] = self.skipinvalidtunableparams
+        res['parameters']['enforcemodelsignalcoverage'] = self.enforcemodelsignalcoverage
+        res['parameters']['tunableparamexternalsource'] = self.tunableparamexternalsource
+        res['parameters']['nonvirtualbusmode'] = self.nonvirtualbusmode
         res['parameters']['Class name'] = 'SimulinkWrapperGAM'
         res['parameters']['parameters'] = self.parameters
         res['label'] = "SimulinkWrapperGAM"
@@ -145,12 +147,12 @@ class SimulinkGAM(MARTe2GAM):
         ''' Deserialize the given object to our class instance '''
         res = super().deserialize(data, hashmap, restore_id)
         self.library = data['parameters']["library"]
-        self.symbol_prefix = data['parameters']["symbol_prefix"]
+        self.symbolprefix = data['parameters']["symbolprefix"]
         self.verbosity = data['parameters']["verbosity"]
-        self.skipinvalid = data['parameters']["skipinvalid"]
-        self.enforcesignalcoverage = data['parameters']["enforcesignalcoverage"]
-        self.tunablesource = data['parameters']["tunablesource"]
-        self.busmode = data['parameters']["busmode"]
+        self.skipinvalidtunableparams = data['parameters']["skipinvalidtunableparams"]
+        self.enforcemodelsignalcoverage = data['parameters']["enforcemodelsignalcoverage"]
+        self.tunableparamexternalsource = data['parameters']["tunableparamexternalsource"]
+        self.nonvirtualbusmode = data['parameters']["nonvirtualbusmode"]
         self.parameters = data['parameters']['parameters']
         return res
 
@@ -175,19 +177,19 @@ class SimulinkGAM(MARTe2GAM):
         # Define Parameters
 
         addLineEdit(mainpanel_instance, node, "Library: ", 'library', 3, 0)
-        addLineEdit(mainpanel_instance, node, "SymbolPrefix: ", 'symbol_prefix', 3, 2)
+        addLineEdit(mainpanel_instance, node, "SymbolPrefix: ", 'symbolprefix', 3, 2)
 
         addComboEdit(mainpanel_instance, node, "Verbosity:",
                      "verbosity", 4, 0, ['2', '1', '0'])
-        addComboEdit(mainpanel_instance, node, "SkipInvalidTunableParams:",
-                     "skipinvalid", 4, 2, ['1', '0'])
+        addComboEdit(mainpanel_instance, node, "skipinvalidtunableparamsTunableParams:",
+                     "skipinvalidtunableparams", 4, 2, ['1', '0'])
         addComboEdit(mainpanel_instance, node, "EnforceModelSignalCoverage:",
-                     "enforcesignalcoverage", 5, 0, ['1', '0'])
+                     "enforcemodelsignalcoverage", 5, 0, ['1', '0'])
         
-        addLineEdit(mainpanel_instance, node, "TunableParamExternalSource: ", 'tunablesource', 5, 2)
+        addLineEdit(mainpanel_instance, node, "TunableParamExternalSource: ", 'tunableparamexternalsource', 5, 2)
 
-        addComboEdit(mainpanel_instance, node, "NonVirtualBusMode:",
-                     "busmode", 6, 0, ['ByteArray', 'Structured'])
+        addComboEdit(mainpanel_instance, node, "NonVirtualnonvirtualbusmode:",
+                     "nonvirtualbusmode", 6, 0, ['ByteArray', 'Structured'])
         
         btn_define_params = QPushButton("Define Parameters")
         btn_define_params.clicked.connect(partial(SimulinkGAM.open_define_parameters_dialog, node))
