@@ -21,7 +21,7 @@ class SimulinkGAM(MARTe2GAM):
                     library: str = '',
                     symbolprefix: str = '',
                     Verbosity: int = 0,
-                    skipinvalidtunableparamsTunableParams: int = 0,
+                    skipinvalidtunableparams: int = 0,
                     EnforceModelSignalCoverage: int = 0,
                     TunableParamExternalSource: str = '',
                     NonVirtualnonvirtualbusmode: str = 'Structured',
@@ -29,7 +29,7 @@ class SimulinkGAM(MARTe2GAM):
         self.library = library
         self.symbolprefix = symbolprefix
         self.verbosity = Verbosity
-        self.skipinvalidtunableparamstunableparams = skipinvalidtunableparamsTunableParams
+        self.skipinvalidtunableparams = skipinvalidtunableparams
         self.enforcemodelsignalcoverage = EnforceModelSignalCoverage
         self.tunableparamexternalsource = TunableParamExternalSource
         self.nonvirtualnonvirtualbusmode = NonVirtualnonvirtualbusmode
