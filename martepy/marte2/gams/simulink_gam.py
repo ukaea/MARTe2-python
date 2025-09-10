@@ -24,7 +24,7 @@ class SimulinkGAM(MARTe2GAM):
                     skipinvalidtunableparams: int = 0,
                     EnforceModelSignalCoverage: int = 0,
                     TunableParamExternalSource: str = '',
-                    NonVirtualnonvirtualbusmode: str = 'Structured',
+                    NonVirtualBusMode: str = 'Structured',
                 ):
         self.library = library
         self.symbolprefix = symbolprefix
@@ -32,7 +32,7 @@ class SimulinkGAM(MARTe2GAM):
         self.skipinvalidtunableparams = skipinvalidtunableparams
         self.enforcemodelsignalcoverage = EnforceModelSignalCoverage
         self.tunableparamexternalsource = TunableParamExternalSource
-        self.nonvirtualnonvirtualbusmode = NonVirtualnonvirtualbusmode
+        self.nonvirtualbusmode = NonVirtualBusMode
         self.parameters = []
         super().__init__(
                 configuration_name = configuration_name,
@@ -46,11 +46,11 @@ class SimulinkGAM(MARTe2GAM):
         config_writer.writeNode('Library', f'"{self.library}"')
         config_writer.writeNode('SymbolPrefix', f'"{self.symbolprefix}"')
         config_writer.writeNode('Verbosity', f'"{self.verbosity}"')
-        config_writer.writeNode('skipinvalidtunableparamsTunableParams', f'"{self.skipinvalidtunableparams}"')
+        config_writer.writeNode('SkipInvalidTunableParams', f'"{self.skipinvalidtunableparams}"')
         config_writer.writeNode('EnforceModelSignalCoverage', f'"{self.enforcemodelsignalcoverage}"')
         if(self.parameters):
             config_writer.writeNode('TunableParamExternalSource', f'"{self.tunableparamexternalsource}"')
-        config_writer.writeNode('NonVirtualnonvirtualbusmode', f'"{self.nonvirtualbusmode}"')
+        config_writer.writeNode('NonVirtualBusMode', f'"{self.nonvirtualbusmode}"')
 
     # Groups our signals by bus for outputting
     def group_by_bus(self, items):
@@ -85,7 +85,7 @@ class SimulinkGAM(MARTe2GAM):
             signal_details = normalizeSignal(copy.deepcopy(info))
 
             for key, value in signal_details['MARTeConfig'].items():
-                if not(key == 'Bus') and not(key == 'Alias'):
+                if not(key == 'Bus'):
                     config_writer.writeNode(key, value)
             config_writer.endSection(name)
 

@@ -6,7 +6,6 @@ class SDNSubscriber(MARTe2DataSource):
     ''' Pythonic representation of the SDN Subscriber '''
     def __init__(self,
                     configuration_name: str = 'SDNSubscriber',
-                    input_signals = [],
                     output_signals = [],
                     execution_mode: str = 'IndependentThread',
                     topic: str = 'name',

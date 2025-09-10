@@ -7,7 +7,6 @@ class EPICSSubscriber(MARTe2DataSource):
     ''' Pythonic representation of the EPICS Subscriber class '''
     def __init__(self,
                     configuration_name: str = 'EPICSSubscriber',
-                    input_signals = [],
                     output_signals = [],
                     StackSize = 1048576,
                     CPUs = 0xff,
