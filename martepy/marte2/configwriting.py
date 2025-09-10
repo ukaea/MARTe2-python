@@ -120,12 +120,15 @@ class JSONConfigWriter(StringConfigWriter):
     def startSection(self, name):
         ''' Start a new indentation section encapsulated with {} but not necessarily
         a new class - does not enforce the class definition line. '''
-        self.writeBareLine(f'"{str(name).strip('"').strip("'")}" : {{')
+        self.writeBareLine('"{0}" : {{'.format(str(name).strip('"').strip("'")))
         self.tab += 1
         self.sectionStack.append(name)
 
     def writeNode(self, name, value):
         ''' Write parameter or basic line'''
-        self.writeBareLine(f'"{str(name).strip('"').strip("'")}" : "{str(value).strip('"').strip("'")}",')
+        self.writeBareLine('"{}" : "{}",'.format(
+            str(name).strip('"').strip("'"),
+            str(value).strip('"').strip("'")
+        ))
 
 
