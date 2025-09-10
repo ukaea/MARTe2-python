@@ -60,6 +60,7 @@ def buildTree(content):
     current_node = root
     lines = content.split('\n')
     building = False
+    multiline_expr = False
     current_line = ''
     key = ''
     for line in lines:
@@ -69,6 +70,12 @@ def buildTree(content):
             if not stripped_line.strip().endswith('\\n'):
                 building = False
                 current_node.addParameter(key, current_line.replace('\\n','\n'))
+            continue
+        if multiline_expr:
+            current_line += stripped_line + '\n'
+            if stripped_line == '\"' or (stripped_line.endswith('\"')):
+                multiline_expr = False
+                current_node.addParameter(key, current_line.rstrip('\n'))
             continue
         if stripped_line.strip().endswith('{'):
             # Start of a new TreeNode
@@ -90,6 +97,9 @@ def buildTree(content):
             value = value.strip()
             if stripped_line.strip(' ').endswith('\\n'):
                 building = True
+                current_line = value
+            elif value == '\"' or (value.startswith('\"') and not value.endswith('\"')):
+                multiline_expr = True
                 current_line = value
             else:
                 current_node.addParameter(key, value)
