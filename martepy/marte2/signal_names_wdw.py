@@ -24,13 +24,14 @@ from martepy.functions.extra_functions import getname
 class SignalWdw(QMainWindow):
     ''' The configurable signal window where the user can configure signals in XMARTe2. '''
     def __init__(self, parent=None, node=None, hasdefault=False, epics=False,
-                 samples=False, io='output'):
+                 samples=False, io='output', buses=False):
         if node is None:
             raise ValueError("Node cannot be null")
         super().__init__(parent)
         self.node = node
         self.to_delete = []
         self.epics = epics
+        self.bus = buses
         self.samples = samples
         self.io = io
         self.app = node.application.app
@@ -43,12 +44,11 @@ class SignalWdw(QMainWindow):
         self.centralWidget().setLayout(self.vlayout)
         # Section which defines input signals and their options selected
         self.signal_tbl = QTableWidget()
-        self.vlayout.addWidget(self.signal_tbl)
+        self.vlayout.addWidget(self.signal_tbl, stretch=1)
         signals = node.outputsb if self.io == 'output' else node.inputsb
         self.signal_tbl.setRowCount(len(signals))
         headers = ["Signal Name", "Datasource", "Type",
                    "NumberOfDimensions", "NumberOfElements", 'Alias']
-
 
         self.is_datasource = isinstance(self.node.application.API.toGAM(self.node),
                                                        MARTe2DataSource)
@@ -101,19 +101,22 @@ class SignalWdw(QMainWindow):
     def handleAdditionalHeaders(self, headers):
         ''' Handle whether we need additional headers '''
         header_cnt = 0
+        if self.bus:
+            # Remove the last item in-place instead of slicing
+            headers.append('Bus')
+            header_cnt += 1
         if self.default:
-            headers += ['Default']
+            headers.append('Default')
             header_cnt += 1
         if self.epics:
-            headers += ["PVName"]
+            headers.append('PVName')
             header_cnt += 1
-
         if self.samples:
-            headers += ['Samples']
+            headers.append('Samples')
             header_cnt += 1
         return header_cnt
 
-    def createSignalRow(self, signal, is_datasource, row_num):
+    def createSignalRow(self, signal, is_datasource, row_num): # pylint: disable=R0914
         ''' Given a signal, add it to our table '''
         def getSetKey(key, default_val):
             ''' Check that a key exists and if not, create it '''
@@ -139,6 +142,10 @@ class SignalWdw(QMainWindow):
         alias = getSetKey('Alias', signal[0])
         self.signal_tbl.setItem(row_num, 5, QTableWidgetItem(alias))
         colcount = 6
+        if self.bus:
+            bus = getSetKey('Bus', signal[0])
+            self.signal_tbl.setItem(row_num, colcount, QTableWidgetItem(bus))
+            colcount += 1
         if self.default:
             default = getSetKey('Default', '{1}')
             self.signal_tbl.setItem(row_num, colcount, QTableWidgetItem(default))
@@ -180,7 +187,9 @@ class SignalWdw(QMainWindow):
 
     def deleteRow(self, row):
         ''' Set the current signal to be deleted unless the window is not saved when closed '''
-        self.signal_tbl.removeRow(row)
+        # update row count to account for previously deleted rows
+        tblrow = self.signal_tbl.rowCount() -1 if row >= self.signal_tbl.rowCount() else row
+        self.signal_tbl.removeRow(tblrow)
         socket_list = self.node.outputs if self.io == 'output' else self.node.inputs
         socket_to_delete = socket_list[row]
         self.to_delete += [(row,socket_to_delete)]
@@ -226,20 +235,31 @@ class SignalWdw(QMainWindow):
         )
         self.setCentralWidget(QWidget(self))
 
-    def save(self):
+    def save(self):  # pylint: disable=R0914, R0915, R0912
         ''' Save our changes - quite complex as we handle our buffered deletions and delete
         these from the node '''
         if self.to_delete:
-            for socket_to_delete in self.to_delete:
-                if self.io == 'output':
-                    self.node.outputs = [a for a in self.node.outputs if
-                                        not a == socket_to_delete[1]]
-                else:
-                    self.node.inputs = [a for a in self.node.inputs if
-                                        not a == socket_to_delete[1]]
-                socket_to_delete[1].delete()
-                signal_list = self.node.outputsb if self.io == 'output' else self.node.inputsb
-                signal_list.pop(socket_to_delete[0])
+            sockets_to_remove = set()
+            positions_to_remove = set()
+
+            for position, socket in self.to_delete:
+                sockets_to_remove.add(socket)
+                socket.delete()
+                positions_to_remove.add(position)
+
+            if self.io == 'output':
+                self.node.outputs = [
+                    sock for sock in self.node.outputs if sock not in sockets_to_remove
+                ]
+            else:
+                self.node.inputs = [
+                    sock for sock in self.node.inputs if sock not in sockets_to_remove
+                ]
+
+            signal_list = self.node.outputsb if self.io == 'output' else self.node.inputsb
+            for pos in sorted(positions_to_remove, reverse=True):
+                if 0 <= pos < len(signal_list):
+                    signal_list.pop(pos)
         signals = self.node.outputsb if self.io == 'output' else self.node.inputsb
         for row in range(len(signals)): # pylint:disable=C0200
             new_tuple = None
@@ -250,6 +270,9 @@ class SignalWdw(QMainWindow):
             config['MARTeConfig']['NumberOfElements'] = self.signal_tbl.item(row, 4).text()
             config['MARTeConfig']['Alias'] = self.signal_tbl.item(row, 5).text()
             colcount = 6
+            if self.bus:
+                config['MARTeConfig']['Bus'] = self.signal_tbl.item(row, colcount).text()
+                colcount += 1
             if self.default:
                 config['MARTeConfig']['Default'] = self.signal_tbl.item(row, colcount).text()
                 colcount += 1
@@ -263,8 +286,9 @@ class SignalWdw(QMainWindow):
                 try:
                     socket_idx = edge.end_socket.node.inputs.index(edge.end_socket)
                     inputsb = edge.end_socket.node.inputsb[socket_idx]
-                    inputsb[1]['MARTeConfig']['Alias'] = self.signal_tbl.item(row, 5).text()
+                    inputsb[1]['MARTeConfig']['Alias'] = self.signal_tbl.item(row, 0).text()
                     inputsb[1]['MARTeConfig']['DataSource'] = self.signal_tbl.item(row, 1).text()
+                    inputsb[1]['MARTeConfig']['Type'] = self.signal_tbl.item(row, 2).text()
                     edge.end_socket.node.updateSocketPositions()
                 except AttributeError:
                     pass
@@ -272,6 +296,10 @@ class SignalWdw(QMainWindow):
             signals[row] = new_tuple
             sockets[row].label = name
         self.node.updateSocketPositions()
+        try:
+            self.node.grNode.updateDim()
+        except AttributeError:
+            pass  # continue without resizing
         application = self.node.application
         self.node.resetParameterbar()
         self.node.onDoubleClicked(None)

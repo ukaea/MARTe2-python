@@ -24,7 +24,6 @@ class RFileWriter(MARTe2DataSource):
     def __init__(self,
                     configuration_name: str = 'FileWriter',
                     input_signals = [],
-                    output_signals = [],
                     numberofbuffers: int = 100000,
                     cpumask: int = 0xFFFFFFFF,
                     stacksize: int = 100000000,

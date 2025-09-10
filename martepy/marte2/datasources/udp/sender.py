@@ -8,7 +8,6 @@ class UDPSender(MARTe2DataSource):
     def __init__(self,
                     configuration_name: str = 'UDPSender',
                     input_signals = [],
-                    output_signals = [],
                     port: int = 0,
                     cpumask: int = 0xFFFFFFFF,
                     executionmode = 'IndependentThread',
@@ -19,7 +18,7 @@ class UDPSender(MARTe2DataSource):
                 ):
         super().__init__(
                 configuration_name = configuration_name,
-                class_name = 'UDPDrv::UDPSender',
+                class_name = 'UDP::UDPSender',
                 input_signals = input_signals
             )
         self.port = port

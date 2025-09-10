@@ -9,7 +9,6 @@ class EPICSPublisher(MARTe2DataSource):
     def __init__(self,
                     configuration_name: str = 'EPICSPublisher',
                     input_signals = [],
-                    output_signals = [],
                     StackSize = 1048576,
                     CPUs = 0xff,
                     NumberOfBuffers=10,

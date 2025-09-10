@@ -7,10 +7,9 @@ class UDPReceiver(MARTe2DataSource):
     ''' Pythonic representation of the UDP Receiver '''
     def __init__(self,
                     configuration_name: str = 'UDPReceiver',
-                    input_signals = [],
                     output_signals = [],
-                    address: str = '127.0.0.1',
-                    interfaceaddress: str = '0.0.0.0',
+                    address: str = '',
+                    interfaceaddress: str = '',
                     stacksize = 10000000,
                     executionmode: str = 'IndependentThread',
                     timeout: int = 0,
@@ -42,8 +41,10 @@ class UDPReceiver(MARTe2DataSource):
                 config_writer.writeNode('CPUMask', hex(int(self.cpu_mask)))
         else:
             config_writer.writeNode('CPUMask', hex(self.cpu_mask))
-        config_writer.writeNode('Address', f'"{self.address}"')
-        config_writer.writeNode('InterfaceAddress', f'"{self.interfaceaddress}"')
+        if self.address:
+            config_writer.writeNode('Address', f'"{self.address}"')
+        if self.interfaceaddress:
+            config_writer.writeNode('InterfaceAddress', f'"{self.interfaceaddress}"')
         config_writer.writeNode('StackSize', f'{self.stacksize}')
         self.writeOutputSignals(config_writer, section_name='Signals')
 

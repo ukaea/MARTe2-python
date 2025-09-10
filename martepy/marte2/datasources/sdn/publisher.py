@@ -7,7 +7,6 @@ class SDNPublisher(MARTe2DataSource):
     def __init__(self,
                     configuration_name: str = 'SDNPublisher',
                     input_signals = [],
-                    output_signals = [],
                     topic: str = 'name',
                     interface: str = 'name',
                     address: str = '',

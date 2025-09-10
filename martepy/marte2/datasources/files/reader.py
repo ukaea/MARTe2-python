@@ -21,7 +21,6 @@ class FileReader(MARTe2DataSource):
     ''' Pythonic representation of the FileReader '''
     def __init__(self,
                     configuration_name: str = 'FileReader',
-                    input_signals = [],
                     output_signals = [],
                     filename = "",
                     fileformat = "csv",

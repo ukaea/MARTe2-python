@@ -22,6 +22,9 @@ class FileWriter(MARTe2DataSource):
                     numpretriggers = 0,
                     numposttriggers = 0
                 ):
+        if output_signals:
+            raise TypeError('''FileWriter does not accept any
+ output signals but output signals were given''')
         super().__init__(
                 configuration_name = configuration_name,
                 class_name = 'FileDataSource::FileWriter',

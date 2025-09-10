@@ -2,6 +2,7 @@
 """A module for creating MARTe configuration files in the output"""
 
 import warnings
+import json
 
 class ConfigWriter:
     ''' The Configuration Writer base class that is used by all MARTe2 objects 
@@ -91,3 +92,64 @@ class StringConfigWriter(ConfigWriter):
     def toLines(self):
         ''' Return the currently defined lines. '''
         return self.lines
+
+class JSONConfigWriter:
+    """A JSON config builder that produces a nested JSON object instead of raw text."""
+    def __init__(self):
+        self.root = {}             # root JSON object
+        self.stack = [self.root]   # stack of dicts for nested sections
+        self.tab = 0
+        self.tab_text = ''
+
+    def setTab(self, newtab, _):
+        ''' Set the tab indentation currently.'''
+        self.tab = newtab
+
+    def _current(self):
+        """Get the current dict we're writing into."""
+        return self.stack[-1]
+
+    def __repr__(self):
+        """Pretty-print as formatted JSON string."""
+        return json.dumps(self.root, indent=4)
+
+    def toString(self):
+        """Return as compact JSON string."""
+        return json.dumps(self.root)
+
+    def toObject(self):
+        """Return the underlying Python dict object."""
+        return self.root
+
+    def startClass(self, name, typename):
+        """Begin a class section with 'Class' attribute."""
+        self.startSection(name)
+        self.writeNode("Class", typename)
+
+    def writeMARTe2Vector(self, name, data, formatAsFloat=True):
+        ''' Write a MARTe2 vector/array. '''
+        if formatAsFloat:
+            datastring = ' '.join(['%g' % d for d in data]) # pylint: disable=C0209
+        else:
+            datastring = ' '.join([f'{d}' for d in data])
+        self.writeNode(name, f'{{ {datastring} }}')
+
+    def startSection(self, name):
+        """Start a new dict section under the current object."""
+        clean_name = str(name).strip('"').strip("'")
+        new_section = {}
+        self._current()[clean_name] = new_section
+        self.stack.append(new_section)
+
+    def endSection(self, _):
+        """Close the current section and return to the parent."""
+        if len(self.stack) > 1:
+            self.stack.pop()
+        else:
+            raise RuntimeError("Cannot close root section")
+
+    def writeNode(self, name, value):
+        """Insert a key/value node into the current dict."""
+        clean_name = str(name).strip('"').strip("'")
+        clean_value = str(value).strip('"').strip("'")
+        self._current()[clean_name] = clean_value
