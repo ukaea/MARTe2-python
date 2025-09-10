@@ -91,3 +91,41 @@ class StringConfigWriter(ConfigWriter):
     def toLines(self):
         ''' Return the currently defined lines. '''
         return self.lines
+
+class JSONConfigWriter(StringConfigWriter):
+    '''The derived class which actually outputs when used a string output and returns the
+    MARTe2 object as a string object. '''
+    def __init__(self, **kwargs):
+        super().__init__(**kwargs)
+        self.lines = []
+    def _output(self, line):
+        ''' Append to our existing lines. '''
+        self.lines.append(line)
+    def __repr__(self):
+        ''' Give a full output string format of the configuration object '''
+        return '\n'.join(self.toLines())
+    def toString(self):
+        ''' Produce the object as a string '''
+        return str(self)
+    def toLines(self):
+        ''' Return the currently defined lines. '''
+        return self.lines
+
+    def startClass(self, name, typename):
+        ''' Begin writing a class, encapsulating it with { and enforcing the Class
+        definition is written. '''
+        self.startSection(name)
+        self.writeNode('Class', typename)
+
+    def startSection(self, name):
+        ''' Start a new indentation section encapsulated with {} but not necessarily
+        a new class - does not enforce the class definition line. '''
+        self.writeBareLine(f'"{str(name).strip('"').strip("'")}" : {{')
+        self.tab += 1
+        self.sectionStack.append(name)
+
+    def writeNode(self, name, value):
+        ''' Write parameter or basic line'''
+        self.writeBareLine(f'"{str(name).strip('"').strip("'")}" : "{str(value).strip('"').strip("'")}",')
+
+
