@@ -1,6 +1,5 @@
 
 from martepy.marte2 import (
-    MARTe2Application,
     MARTe2RealTimeThread,
     MARTe2RealTimeState,
     MARTe2GAMScheduler
@@ -20,6 +19,8 @@ from martepy.marte2.datasources import (
     GAMDataSource
 )
 from martepy.marte2.objects.referencecontainer import MARTe2ReferenceContainer
+
+from martepy.marte2.generic_application import MARTe2Application
 
 CPU_OFFSET_FROM_ONE = 0  # 0 to start at cpu 1
 def cpu_thread_gen(x):
