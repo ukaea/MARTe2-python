@@ -65,7 +65,7 @@ def textChangeOut(wdgt, node, default, epics, type_input, datasource=None, # pyl
                                                    'newsignal')
                 existing_node_names.append(unique_name)
                 socket = node.__class__.Socket_class(
-                    node=node, index=count + i, position=position,
+                    node=node, index=count + i + 1, position=position,
                     socket_type=0, multi_edges=multi_edges,
                     count_on_this_node_side=len(shadow), is_input=type_input, label=unique_name
                 )
@@ -84,6 +84,7 @@ def textChangeOut(wdgt, node, default, epics, type_input, datasource=None, # pyl
                 del shadow[-1]
 
         node.content.updateDim()
+        node.updateSocketPositions()
 
 def getSetKey(signal, key, default_val):
     ''' Check that a key exists and if not, create it '''
@@ -128,6 +129,44 @@ def addComboEdit(mainpanel_instance, node, lbl_name, para_name, row, col_start, 
     mainpanel_instance.configbarBox.addWidget(wgt_label, row, col_start)
     mainpanel_instance.configbarBox.addWidget(wgt_field, row, col_start+1)
 
+def fixSignals(node):
+    ''' This function fixes a signal issue by detecting whether a socket
+    has a corresponding signal definition, if not, all are deleted. '''
+    modified = False
+
+    expected_count = len(node.inputsb)
+
+    if len(node.inputs) > expected_count:
+        # Delete the extra objects
+        for obj in node.inputs[expected_count:]:
+            obj.delete()
+        # Trim the object_list
+        del node.inputs[expected_count:]
+        modified = True
+    
+    expected_count = len(node.outputsb)
+
+    if len(node.outputs) > expected_count:
+        # Delete the extra objects
+        for obj in node.outputs[expected_count:]:
+            obj.delete()
+        # Trim the object_list
+        del node.outputs[expected_count:]
+        modified = True
+
+    if modified:
+        msg = QMessageBox()
+        msg.setIcon(QMessageBox.Warning)
+        msg.setWindowTitle("Corrupted Signals")
+        msg.setText(
+            "The following node had corrupted signals defined for its sockets.\n\n"
+            "As a result, the signals had to be deleted. "
+            "Please review the node and readjust as needed.\n\n"
+            f"The node was: {node.configuration_name}"
+        )
+        msg.setStandardButtons(QMessageBox.Ok)
+        msg.exec_()
+
 def addSignalsSection(mainpanel_instance, node, default=False, epics=False, type_input=False, buses=False):
     ''' Adds a generic signal selection section to a node panel '''
     lbl_wgt = QLabel("Number of signals: ")
@@ -135,7 +174,7 @@ def addSignalsSection(mainpanel_instance, node, default=False, epics=False, type
     length = len(node.inputsb) if type_input else len(node.outputsb)
     no_signals_wgt.setText(str(length))
     no_signals_wgt.resize(230, 80)
-    no_signals_wgt.textChanged.connect(partial(textChangeOut,
+    no_signals_wgt.editingFinished.connect(partial(textChangeOut,
                                                no_signals_wgt,
                                                node,
                                                default,
@@ -149,9 +188,10 @@ def addSignalsSection(mainpanel_instance, node, default=False, epics=False, type
             bus = False
             if buses:
                 # Now we need to check the actual configuration - this is specifically for the SimulinkWrapperGAM
-                if node.parameters["busmode"] == 'Structured':
+                if node.parameters["nonvirtualbusmode"] == 'Structured':
                     # Then we need to change the signal window to be a bus configuration window
                     bus = True
+            fixSignals(node)
             config_signals = SignalWdw(mainpanel_instance, node, default, epics, buses=bus)
             node.application.newwindow = config_signals
             config_signals.show()
@@ -171,7 +211,7 @@ def addInputSignalsSection(mainpanel_instance, node, pack=True, samples=False,
     length = len(node.inputsb)
     no_signals_wgt.setText(str(length))
     no_signals_wgt.resize(230, 80)
-    no_signals_wgt.textChanged.connect(partial(textChangeOut, no_signals_wgt,
+    no_signals_wgt.editingFinished.connect(partial(textChangeOut, no_signals_wgt,
                                                node, False, epics, True, datasource, samples))
     mainpanel_instance.configbarBox.addWidget(lbl_wgt, 1, 0)
     mainpanel_instance.configbarBox.addWidget(no_signals_wgt, 1, 1)
@@ -180,9 +220,10 @@ def addInputSignalsSection(mainpanel_instance, node, pack=True, samples=False,
         bus = False
         if buses:
             # Now we need to check the actual configuration - this is specifically for the SimulinkWrapperGAM
-            if node.parameters["busmode"] == 'Structured':
+            if node.parameters["nonvirtualbusmode"] == 'Structured':
                 # Then we need to change the signal window to be a bus configuration window
                 bus = True
+        fixSignals(node)
         config_signals = SignalWdw(mainpanel_instance, node, False, epics, samples,'input', buses=bus)
         node.application.newwindow = config_signals
         config_signals.show()
@@ -204,7 +245,7 @@ def addOutputSignalsSection(mainpanel_instance, node, start = 0, pack=True, data
     length = len(node.outputsb)
     no_signals_wgt.setText(str(length))
     no_signals_wgt.resize(230, 80)
-    no_signals_wgt.textChanged.connect(partial(textChangeOut, no_signals_wgt,
+    no_signals_wgt.editingFinished.connect(partial(textChangeOut, no_signals_wgt,
                                                node, default, epics, False, datasource, samples))
     rowstart = 1
     mainpanel_instance.configbarBox.addWidget(lbl_wgt, rowstart, start)
@@ -213,7 +254,7 @@ def addOutputSignalsSection(mainpanel_instance, node, start = 0, pack=True, data
         bus = False
         if buses:
             # Now we need to check the actual configuration - this is specifically for the SimulinkWrapperGAM
-            if node.parameters["busmode"] == 'Structured':
+            if node.parameters["nonvirtualbusmode"] == 'Structured':
                 # Then we need to change the signal window to be a bus configuration window
                 bus = True
         config_signals = SignalWdw(mainpanel_instance, node, default, epics, samples, buses=bus)

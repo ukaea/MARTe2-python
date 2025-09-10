@@ -44,7 +44,7 @@ class SignalWdw(QMainWindow):
         self.centralWidget().setLayout(self.vlayout)
         # Section which defines input signals and their options selected
         self.signal_tbl = QTableWidget()
-        self.vlayout.addWidget(self.signal_tbl)
+        self.vlayout.addWidget(self.signal_tbl, stretch=1)
         signals = node.outputsb if self.io == 'output' else node.inputsb
         self.signal_tbl.setRowCount(len(signals))
         headers = ["Signal Name", "Datasource", "Type",
@@ -187,7 +187,9 @@ class SignalWdw(QMainWindow):
 
     def deleteRow(self, row):
         ''' Set the current signal to be deleted unless the window is not saved when closed '''
-        self.signal_tbl.removeRow(row)
+        # update row count to account for previously deleted rows
+        tblrow = self.signal_tbl.rowCount() -1 if row >= self.signal_tbl.rowCount() else row
+        self.signal_tbl.removeRow(tblrow)
         socket_list = self.node.outputs if self.io == 'output' else self.node.inputs
         socket_to_delete = socket_list[row]
         self.to_delete += [(row,socket_to_delete)]
@@ -233,20 +235,31 @@ class SignalWdw(QMainWindow):
         )
         self.setCentralWidget(QWidget(self))
 
-    def save(self):
+    def save(self):  # pylint: disable=R0914, R0915, R0912
         ''' Save our changes - quite complex as we handle our buffered deletions and delete
         these from the node '''
         if self.to_delete:
-            for socket_to_delete in self.to_delete:
-                if self.io == 'output':
-                    self.node.outputs = [a for a in self.node.outputs if
-                                        not a == socket_to_delete[1]]
-                else:
-                    self.node.inputs = [a for a in self.node.inputs if
-                                        not a == socket_to_delete[1]]
-                socket_to_delete[1].delete()
-                signal_list = self.node.outputsb if self.io == 'output' else self.node.inputsb
-                signal_list.pop(socket_to_delete[0])
+            sockets_to_remove = set()
+            positions_to_remove = set()
+
+            for position, socket in self.to_delete:
+                sockets_to_remove.add(socket)
+                socket.delete()
+                positions_to_remove.add(position)
+
+            if self.io == 'output':
+                self.node.outputs = [
+                    sock for sock in self.node.outputs if sock not in sockets_to_remove
+                ]
+            else:
+                self.node.inputs = [
+                    sock for sock in self.node.inputs if sock not in sockets_to_remove
+                ]
+
+            signal_list = self.node.outputsb if self.io == 'output' else self.node.inputsb
+            for pos in sorted(positions_to_remove, reverse=True):
+                if 0 <= pos < len(signal_list):
+                    signal_list.pop(pos)
         signals = self.node.outputsb if self.io == 'output' else self.node.inputsb
         for row in range(len(signals)): # pylint:disable=C0200
             new_tuple = None
@@ -275,6 +288,7 @@ class SignalWdw(QMainWindow):
                     inputsb = edge.end_socket.node.inputsb[socket_idx]
                     inputsb[1]['MARTeConfig']['Alias'] = self.signal_tbl.item(row, 0).text()
                     inputsb[1]['MARTeConfig']['DataSource'] = self.signal_tbl.item(row, 1).text()
+                    inputsb[1]['MARTeConfig']['Type'] = self.signal_tbl.item(row, 2).text()
                     edge.end_socket.node.updateSocketPositions()
                 except AttributeError:
                     pass
@@ -282,6 +296,10 @@ class SignalWdw(QMainWindow):
             signals[row] = new_tuple
             sockets[row].label = name
         self.node.updateSocketPositions()
+        try:
+            self.node.grNode.updateDim()
+        except AttributeError:
+            pass  # continue without resizing
         application = self.node.application
         self.node.resetParameterbar()
         self.node.onDoubleClicked(None)
