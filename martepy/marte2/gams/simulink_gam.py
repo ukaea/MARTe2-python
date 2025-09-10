@@ -1,19 +1,22 @@
-''' Pythonic representation of the Expression GAM'''
+''' Pythonic representation of the Simulink GAM'''
 from collections import defaultdict
 from functools import partial
 import copy
 
 from PyQt5.QtWidgets import (
-    QTextEdit,
-    QLabel,
-    QPushButton
+    QDialog, QVBoxLayout, QHBoxLayout, QTableWidget, QTableWidgetItem,
+    QPushButton, QComboBox, QAbstractItemView
 )
+from PyQt5.QtCore import QSize
+from PyQt5.QtGui import QGuiApplication
 
 from martepy.marte2.gam import MARTe2GAM
-from martepy.marte2.qt_functions import addInputSignalsSection, addOutputSignalsSection, paraChange, addComboEdit, addLineEdit, getSetKey
+from martepy.marte2.qt_functions import (addInputSignalsSection, addOutputSignalsSection,
+                                         addComboEdit, addLineEdit, getSetKey)
 from martepy.functions.extra_functions import normalizeSignal
+
 class SimulinkGAM(MARTe2GAM):
-    ''' Pythonic representation of the Expression GAM'''
+    ''' Pythonic representation of the Simulink GAM'''
     def __init__(self,
                     configuration_name: str = 'SimulinkWrapperGAM',
                     input_signals: list = [],
@@ -47,13 +50,16 @@ class SimulinkGAM(MARTe2GAM):
         config_writer.writeNode('SymbolPrefix', f'"{self.symbolprefix}"')
         config_writer.writeNode('Verbosity', f'"{self.verbosity}"')
         config_writer.writeNode('SkipInvalidTunableParams', f'"{self.skipinvalidtunableparams}"')
-        config_writer.writeNode('EnforceModelSignalCoverage', f'"{self.enforcemodelsignalcoverage}"')
-        if(self.parameters):
-            config_writer.writeNode('TunableParamExternalSource', f'"{self.tunableparamexternalsource}"')
+        config_writer.writeNode('EnforceModelSignalCoverage',
+                                f'"{self.enforcemodelsignalcoverage}"')
+        if self.parameters:
+            config_writer.writeNode('TunableParamExternalSource',
+                                    f'"{self.tunableparamexternalsource}"')
         config_writer.writeNode('NonVirtualBusMode', f'"{self.nonvirtualbusmode}"')
 
     # Groups our signals by bus for outputting
-    def group_by_bus(self, items):
+    def groupByBus(self, items):
+        ''' Group signals together who have the same bus '''
         grouped = defaultdict(list)
 
         for name, info in items:
@@ -61,18 +67,19 @@ class SimulinkGAM(MARTe2GAM):
             grouped[bus].append((name, info))
 
         result = []
-        for bus in sorted(grouped.keys(), key=lambda x: str(x)):
+        for bus in sorted(grouped.keys(), key=str):
             result.extend(grouped[bus])
 
         return result
 
     def writeBuses(self, config_writer, ordered_by_bus):
+        ''' If using bus, write as a bus into the config '''
         if not ordered_by_bus:
             return  # nothing to process
-        
+
         current_bus = None
 
-        for idx, (name, info) in enumerate(ordered_by_bus):
+        for _, (name, info) in enumerate(ordered_by_bus):
             bus = getSetKey(info, 'Bus', '')
 
             if bus != current_bus:
@@ -85,7 +92,7 @@ class SimulinkGAM(MARTe2GAM):
             signal_details = normalizeSignal(copy.deepcopy(info))
 
             for key, value in signal_details['MARTeConfig'].items():
-                if not(key == 'Bus'):
+                if not key == 'Bus':
                     config_writer.writeNode(key, value)
             config_writer.endSection(name)
 
@@ -93,6 +100,7 @@ class SimulinkGAM(MARTe2GAM):
         if current_bus is not None:
             config_writer.endSection(current_bus)
     # May want to override this function to allow bus definitions and parameters
+
     def write(self, config_writer):
         ''' Write the total GAM configuration '''
         config_writer.startClass('+' + self.configuration_name.lstrip('+'), self.class_name)
@@ -100,7 +108,7 @@ class SimulinkGAM(MARTe2GAM):
         if self.input_signals:
             config_writer.startSection('InputSignals')
             if self.nonvirtualbusmode == 'Structured':
-                ordered_by_bus = self.group_by_bus(self.input_signals)
+                ordered_by_bus = self.groupByBus(self.input_signals)
                 self.writeBuses(config_writer, ordered_by_bus)
             else:
                 self.writeSignals(self.input_signals, config_writer)
@@ -108,19 +116,21 @@ class SimulinkGAM(MARTe2GAM):
         if self.output_signals:
             config_writer.startSection('OutputSignals')
             if self.nonvirtualbusmode == 'Structured':
-                ordered_by_bus = self.group_by_bus(self.output_signals)
+                ordered_by_bus = self.groupByBus(self.output_signals)
                 self.writeBuses(config_writer, ordered_by_bus)
             else:
                 self.writeSignals(self.output_signals, config_writer)
             config_writer.endSection('OutputSignals')
-        
+
         # Print parameters section as Ref container
         if self.parameters:
             config_writer.startSection('Parameters')
             for param in self.parameters:
                 # param.get('parameter_name', ''), param.get('type', ''), param.get('presets', '')
-                line = f'{param["parameter_name"]} = ({param["type"]}) {param["presets"]}'
-                config_writer.writeBareLine(line)
+                config_writer.writeNode(
+                    f"{param['parameter_name']}",
+                    f"({param['type']}) {param['presets']}"
+                )
             config_writer.endSection('Parameters')
 
         config_writer.endSection('+' + self.configuration_name.lstrip('+'))
@@ -157,7 +167,8 @@ class SimulinkGAM(MARTe2GAM):
         return res
 
     @staticmethod
-    def open_define_parameters_dialog(node):
+    def openDefineParametersDialog(node):
+        ''' Called from xMARTe to define the parameters via a dialog '''
         dialog = DefineParametersDialog(node)
         dialog.exec_()
 
@@ -171,7 +182,8 @@ class SimulinkGAM(MARTe2GAM):
         datasource = app_def.configuration['misc']['gamsources'][0]
         addInputSignalsSection(mainpanel_instance, node, False, buses=True)
 
-        addOutputSignalsSection(mainpanel_instance, node, 3, False, datasource=datasource, buses=True)
+        addOutputSignalsSection(mainpanel_instance, node, 3, False,
+                                datasource=datasource, buses=True)
 
 
         # Define Parameters
@@ -185,14 +197,16 @@ class SimulinkGAM(MARTe2GAM):
                      "skipinvalidtunableparams", 4, 2, ['1', '0'])
         addComboEdit(mainpanel_instance, node, "EnforceModelSignalCoverage:",
                      "enforcemodelsignalcoverage", 5, 0, ['1', '0'])
-        
-        addLineEdit(mainpanel_instance, node, "TunableParamExternalSource: ", 'tunableparamexternalsource', 5, 2)
+
+        addLineEdit(mainpanel_instance, node, "TunableParamExternalSource: ",
+                    'tunableparamexternalsource', 5, 2)
 
         addComboEdit(mainpanel_instance, node, "NonVirtualnonvirtualbusmode:",
                      "nonvirtualbusmode", 6, 0, ['ByteArray', 'Structured'])
-        
+
         btn_define_params = QPushButton("Define Parameters")
-        btn_define_params.clicked.connect(partial(SimulinkGAM.open_define_parameters_dialog, node))
+        btn_define_params.clicked.connect(partial(SimulinkGAM.openDefineParametersDialog,
+                                                  node))
         mainpanel_instance.configbarBox.addWidget(btn_define_params, 6, 2)
 
 def initialize(factory, plugin_datastore) -> None:
@@ -200,25 +214,22 @@ def initialize(factory, plugin_datastore) -> None:
     factory.registerBlock("SimulinkGAM", SimulinkGAM, plugin_datastore)
     factory.registerBlock("SimulinkWrapperGAM", SimulinkGAM, plugin_datastore)
 
-from PyQt5.QtWidgets import (
-    QDialog, QVBoxLayout, QHBoxLayout, QTableWidget, QTableWidgetItem,
-    QPushButton, QComboBox, QAbstractItemView, QHeaderView, QWidget
-)
-from PyQt5.QtCore import Qt, QSize
-from PyQt5.QtGui import QGuiApplication
-
 class DefineParametersDialog(QDialog):
+    ''' Dialog box for setting model parameters '''
     TYPE_OPTIONS = ['uint8', 'int8', 'uint16', 'int16', 'uint32', 'int32', 'float32', 'float64']
 
     def __init__(self, node):
+        ''' Dialog box for setting model parameters '''
         super().__init__()
         self.node = node
         self.setWindowTitle("Define Parameters")
-        self.init_ui()
-        self.load_existing_parameters()
+        self.initUI()
+        self.loadExistingParameters()
 
-    def init_ui(self):
-        self.setMinimumSize(QSize(int(self.screen_width() * 0.3), int(self.screen_height() * 0.5)))
+    def initUI(self):
+        ''' Setup the UI '''
+        self.setMinimumSize(QSize(int(self.screenWidth() * 0.3),
+                                  int(self.screenHeight() * 0.5)))
         self.setModal(True)
 
         layout = QVBoxLayout(self)
@@ -251,24 +262,30 @@ class DefineParametersDialog(QDialog):
         layout.addLayout(bottom_bar)
 
         # Connections
-        self.btn_add.clicked.connect(self.add_row)
-        self.btn_delete.clicked.connect(self.delete_selected_row)
+        self.btn_add.clicked.connect(self.addRow)
+        self.btn_delete.clicked.connect(self.deleteSelectedRow)
         self.btn_cancel.clicked.connect(self.reject)
-        self.btn_apply.clicked.connect(self.apply_changes)
+        self.btn_apply.clicked.connect(self.applyChanges)
 
-    def screen_width(self):
+    def screenWidth(self):
+        ''' Get screen width '''
         return QGuiApplication.primaryScreen().geometry().width()
 
-    def screen_height(self):
+    def screenHeight(self):
+        ''' Get screen height '''
         return QGuiApplication.primaryScreen().geometry().height()
 
-    def load_existing_parameters(self):
+    def loadExistingParameters(self):
+        ''' Load the previous set of parameters and display '''
         self.table.setRowCount(0)
         param_list = self.node.parameters.get('parameters', [])
         for param in param_list:
-            self.add_row(param.get('parameter_name', ''), param.get('type', ''), param.get('presets', ''))
+            self.addRow(param.get('parameter_name', ''),
+                         param.get('type', ''),
+                         param.get('presets', ''))
 
-    def add_row(self, name='', type_str='uint8', presets=''):
+    def addRow(self, name='', type_str='uint8', presets=''):
+        ''' Add another parameter for row '''
         row = self.table.rowCount()
         self.table.insertRow(row)
 
@@ -282,12 +299,14 @@ class DefineParametersDialog(QDialog):
 
         self.table.setItem(row, 2, QTableWidgetItem(presets))
 
-    def delete_selected_row(self):
+    def deleteSelectedRow(self):
+        ''' Delete the selected row '''
         selected = self.table.selectionModel().selectedRows()
         for index in sorted(selected, reverse=True):
             self.table.removeRow(index.row())
 
-    def apply_changes(self):
+    def applyChanges(self):
+        ''' Save parameters to the GAM config '''
         self.node.parameters['parameters'] = []
         for row in range(self.table.rowCount()):
             name_item = self.table.item(row, 0)

@@ -143,7 +143,7 @@ def fixSignals(node):
         # Trim the object_list
         del node.inputs[expected_count:]
         modified = True
-    
+
     expected_count = len(node.outputsb)
 
     if len(node.outputs) > expected_count:
@@ -167,7 +167,8 @@ def fixSignals(node):
         msg.setStandardButtons(QMessageBox.Ok)
         msg.exec_()
 
-def addSignalsSection(mainpanel_instance, node, default=False, epics=False, type_input=False, buses=False):
+def addSignalsSection(mainpanel_instance, node, default=False,
+                      epics=False, type_input=False, buses=False):
     ''' Adds a generic signal selection section to a node panel '''
     lbl_wgt = QLabel("Number of signals: ")
     no_signals_wgt = QLineEdit(mainpanel_instance)
@@ -187,7 +188,8 @@ def addSignalsSection(mainpanel_instance, node, default=False, epics=False, type
         def runWindow():
             bus = False
             if buses:
-                # Now we need to check the actual configuration - this is specifically for the SimulinkWrapperGAM
+                # Now we need to check the actual configuration
+                # this is specifically for the SimulinkWrapperGAM
                 if node.parameters["nonvirtualbusmode"] == 'Structured':
                     # Then we need to change the signal window to be a bus configuration window
                     bus = True
@@ -219,12 +221,14 @@ def addInputSignalsSection(mainpanel_instance, node, pack=True, samples=False,
     def runWindow():
         bus = False
         if buses:
-            # Now we need to check the actual configuration - this is specifically for the SimulinkWrapperGAM
+            # Now we need to check the actual configuration
+            # this is specifically for the SimulinkWrapperGAM
             if node.parameters["nonvirtualbusmode"] == 'Structured':
                 # Then we need to change the signal window to be a bus configuration window
                 bus = True
         fixSignals(node)
-        config_signals = SignalWdw(mainpanel_instance, node, False, epics, samples,'input', buses=bus)
+        config_signals = SignalWdw(mainpanel_instance, node, False,
+                                   epics, samples,'input', buses=bus)
         node.application.newwindow = config_signals
         config_signals.show()
 
@@ -236,7 +240,7 @@ def addInputSignalsSection(mainpanel_instance, node, pack=True, samples=False,
         spacerwgt.setSizePolicy(QSizePolicy.Expanding, QSizePolicy.Minimum)
         mainpanel_instance.configbarBox.addWidget(spacerwgt, 1, 2)
 
-def addOutputSignalsSection(mainpanel_instance, node, start = 0, pack=True, datasource=None,
+def addOutputSignalsSection(mainpanel_instance, node, start = 0, pack=True, datasource=None, # pylint: disable=R0914
                             samples=False, default=False, epics=False, buses=False):
     ''' Add an output signal selection item to a node panel. '''
     # Note if samples is set, we'll start from row 2 for cleanliness
@@ -253,7 +257,8 @@ def addOutputSignalsSection(mainpanel_instance, node, start = 0, pack=True, data
     def runWindow():
         bus = False
         if buses:
-            # Now we need to check the actual configuration - this is specifically for the SimulinkWrapperGAM
+            # Now we need to check the actual configuration
+            # this is specifically for the SimulinkWrapperGAM
             if node.parameters["nonvirtualbusmode"] == 'Structured':
                 # Then we need to change the signal window to be a bus configuration window
                 bus = True

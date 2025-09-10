@@ -70,7 +70,7 @@ def test_UDPSender(address, configuration_name, cpumask, executionmode, numberof
     test_writer = write_datasource_signals_section(input_signals)
 
     assert str(setup_writer) == f'''+{configuration_name} = {{
-    Class = UDPDrv::UDPSender
+    Class = UDP::UDPSender
     Port = {port}
     Address = "{address}"
     ExecutionMode = {executionmode}

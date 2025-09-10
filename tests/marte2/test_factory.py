@@ -14,12 +14,12 @@ def test_factory():
     test_obj.loadRemote(json_file)
     classes = {'ConstantGAM': ConstantGAM, 'ConversionGAM': ConversionGAM, 'ExpressionGAM': ExpressionGAM,
                                 'MathExpressionGAM': ExpressionGAM, 'IOGAM': IOGAM, 'MessageGAM': MessageGAM, 'MuxGAM': MuxGAM,
-                                'SSMGAM': SSMGAM, 'WaveformGAM::WaveformSin': WaveformSinGAM, 'WaveformSin': WaveformSinGAM,
+                                'SSMGAM': SSMGAM, 'SimulinkGAM': SimulinkGAM,'SimulinkWrapperGAM': SimulinkGAM, 'WaveformGAM::WaveformSin': WaveformSinGAM, 'WaveformSin': WaveformSinGAM,
                                 'WaveformSinGAM': WaveformSinGAM, 'WaveformGAM::WaveformChirp': WaveformChirpGAM,
                                 'WaveformChirp': WaveformChirpGAM, 'WaveformChirpGAM': WaveformChirpGAM,
                                 'WaveformGAM::WaveformPointsDef': WaveformPointsGAM, 'WaveformPointsDef': WaveformPointsGAM,
                                 'WaveformPointsGAM': WaveformPointsGAM, 'PIDGAM': PIDGAM, 'FilterGAM': FilterGAM}
-    
+
     assert test_obj.classes == classes
 
     test_obj.unregisterBlock('SSMGAM')
@@ -41,7 +41,7 @@ def test_factory():
 
     assert test_obj.getAll() == [ConstantGAM, ConversionGAM, ExpressionGAM, ExpressionGAM, IOGAM, MessageGAM, MuxGAM,
                                  WaveformSinGAM, WaveformSinGAM, WaveformSinGAM, WaveformChirpGAM, WaveformChirpGAM, WaveformChirpGAM,
-                                 WaveformPointsGAM, WaveformPointsGAM, WaveformPointsGAM, PIDGAM, FilterGAM]
+                                 WaveformPointsGAM, WaveformPointsGAM, WaveformPointsGAM, PIDGAM, FilterGAM, SimulinkGAM, SimulinkGAM]
     
     test_obj.unloadAll()
 

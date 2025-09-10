@@ -222,14 +222,13 @@ signal repeated within function: {function.configuration_name.lstrip('+')}"""))
 
             # Perform a check on IOGAM and the same bytes in as bytes out
             if function.class_name == 'IOGAM':
-                type_sizes = {
-                    'uint8': 1, 'int8': 1,
-                    'uint16': 2, 'int16': 2,
-                    'uint32': 4, 'int32': 4, 'float32': 4,
-                    'uint64': 8, 'int64': 8, 'float64': 8
-                }
-
-                def calculate_total_bytes(signals):
+                def calculateTotalBytes(signals):
+                    type_sizes = {
+                        'uint8': 1, 'int8': 1,
+                        'uint16': 2, 'int16': 2,
+                        'uint32': 4, 'int32': 4, 'float32': 4,
+                        'uint64': 8, 'int64': 8, 'float64': 8
+                    }
                     total = 0
                     for signal in signals:
                         _, config = signal
@@ -241,8 +240,8 @@ signal repeated within function: {function.configuration_name.lstrip('+')}"""))
                         total += type_sizes[type_str] * num_elements
                     return total
 
-                input_total = calculate_total_bytes(function.input_signals)
-                output_total = calculate_total_bytes(function.output_signals)
+                input_total = calculateTotalBytes(function.input_signals)
+                output_total = calculateTotalBytes(function.output_signals)
 
                 if input_total != output_total:
                     exceptions.append(MARTe2Exception(

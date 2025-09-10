@@ -116,7 +116,7 @@ class SignalWdw(QMainWindow):
             header_cnt += 1
         return header_cnt
 
-    def createSignalRow(self, signal, is_datasource, row_num):
+    def createSignalRow(self, signal, is_datasource, row_num): # pylint: disable=R0914
         ''' Given a signal, add it to our table '''
         def getSetKey(key, default_val):
             ''' Check that a key exists and if not, create it '''

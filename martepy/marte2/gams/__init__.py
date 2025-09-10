@@ -3,6 +3,7 @@
 from martepy.marte2.gams.iogam import IOGAM
 from martepy.marte2.gams.constant_gam import ConstantGAM
 from martepy.marte2.gams.ssm_gam import SSMGAM
+from martepy.marte2.gams.simulink_gam import SimulinkGAM
 from martepy.marte2.gams.conversion import ConversionGAM
 from martepy.marte2.gams.expression_gam import ExpressionGAM
 from martepy.marte2.gams.message_gam import MessageGAM
@@ -17,6 +18,7 @@ __all__ = [
         'IOGAM',
         'ConstantGAM',
         'SSMGAM',
+        'SimulinkGAM',
         'ConversionGAM',
         'ExpressionGAM',
         'MessageGAM',
