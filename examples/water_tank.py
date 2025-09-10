@@ -1,6 +1,5 @@
 
 from martepy.marte2 import (
-    MARTe2Application,
     MARTe2RealTimeThread,
     MARTe2RealTimeState,
     MARTe2GAMScheduler
@@ -19,6 +18,9 @@ from martepy.marte2.datasources import (
     FileReader,
     GAMDataSource
 )
+from martepy.marte2.objects.referencecontainer import MARTe2ReferenceContainer
+
+from martepy.marte2.generic_application import MARTe2Application
 
 CPU_OFFSET_FROM_ONE = 0  # 0 to start at cpu 1
 def cpu_thread_gen(x):
@@ -91,13 +93,13 @@ app.add(functions=[IOGAM('+Timer', input_signals, output_signals)])
 app.add(states=[
     MARTe2RealTimeState(
         configuration_name='+Running',
-        threads=[
+        threads=MARTe2ReferenceContainer("Threads", objects=[
             MARTe2RealTimeThread(
                 configuration_name='+Thread0',
                 cpu_mask=16,
                 functions=app.functions,
             ),
-        ],
+        ]),
     ),
 ])
 
