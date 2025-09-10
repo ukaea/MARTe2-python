@@ -219,6 +219,36 @@ function: {function.configuration_name.lstrip('+')}"""))
 signal repeated within function: {function.configuration_name.lstrip('+')}"""))
                 output_signal_aliases.append(getAlias(signal))
                 output_signal_names.append(signal[0])
+
+            # Perform a check on IOGAM and the same bytes in as bytes out
+            if function.class_name == 'IOGAM':
+                type_sizes = {
+                    'uint8': 1, 'int8': 1,
+                    'uint16': 2, 'int16': 2,
+                    'uint32': 4, 'int32': 4, 'float32': 4,
+                    'uint64': 8, 'int64': 8, 'float64': 8
+                }
+
+                def calculate_total_bytes(signals):
+                    total = 0
+                    for signal in signals:
+                        _, config = signal
+                        marte = config.get('MARTeConfig', {})
+                        type_str = marte.get('Type')
+                        num_elements = int(marte.get('NumberOfElements', '1'))
+                        if type_str not in type_sizes:
+                            exceptions.append(MARTe2Exception(f"Unsupported type: {type_str}"))
+                        total += type_sizes[type_str] * num_elements
+                    return total
+
+                input_total = calculate_total_bytes(function.input_signals)
+                output_total = calculate_total_bytes(function.output_signals)
+
+                if input_total != output_total:
+                    exceptions.append(MARTe2Exception(
+                        f"""Input/output size mismatch: {input_total} bytes in, {output_total}
+ bytes out in IOGAM function: {function.configuration_name}"""
+                    ))
         # More than one producer of a signal in a datasource - use MARTeApplication.getAlias
 
         for datasource_name, datasource_signals in produced.items():
@@ -556,13 +586,13 @@ signal/alias: {string} in datasource {datasource_name}"""))
                                                               thread_index, state, thread)
                 thread.functions += new_functions
 
-    def writeToConfig(self):
+    def writeToConfig(self, out=None):
         ''' Write our application out and return as a string '''
         # Fix any breaks in the config automatically
         self.sanitize()
         self.removeUnused()
-
-        out = marteconfig.StringConfigWriter()
+        if not out:
+            out = marteconfig.StringConfigWriter()
 
         for piece in self.externals:
             if piece:
