@@ -119,7 +119,7 @@ class SimulinkGAM(MARTe2GAM):
             config_writer.startSection('Parameters')
             for param in self.parameters:
                 # param.get('parameter_name', ''), param.get('type', ''), param.get('presets', '')
-                line = f'{param['parameter_name']} = ({param['type']}) {param['presets']}'
+                line = f'{param["parameter_name"]} = ({param["type"]}) {param["presets"]}'
                 config_writer.writeBareLine(line)
             config_writer.endSection('Parameters')
 
