@@ -207,7 +207,11 @@ def handleChildObjects(parent_obj, function, factory):
             elif hasattr(parent_obj, child.name.strip('+').lower()):
                 setattr(parent_obj, child.name.strip('+').lower(), child.parameters)
             else:
-                parent_obj.objects += [child_obj]
+                # If it doesn't have a plus, it's not an object
+                if hasattr(parent_obj, 'parseUnknown'):
+                    parent_obj.parseUnknown(child)
+                else:
+                    raise ValueError("Unknown child object to parent found in config")
 
 def getRootClass(tree_root, class_name):
     ''' Iterator that returns the first node in a given tree with a matching class '''
