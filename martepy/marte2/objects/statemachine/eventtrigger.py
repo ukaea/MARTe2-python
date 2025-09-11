@@ -17,6 +17,10 @@ class MARTe2EventConditionTrigger(MARTe2ConfigObject):
         self.configuration_name = configuration_name
         self.objects = msgs
 
+    def parseUnknown(self, obj):
+        for key, value in obj.parameters.items():
+            self.eventtriggers[key] = value
+
     def __eq__(self, other):
         if isinstance(other, self.__class__):
             attributes = ['configuration_name', 'eventtriggers', 'objects']

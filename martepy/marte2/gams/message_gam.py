@@ -20,6 +20,7 @@ from martepy.marte2.qt_classes import AddRemoveHBtn, PanelledListConfig, Message
 from martepy.marte2.objects.referencecontainer import MARTe2ReferenceContainer
 from martepy.marte2.qt_functions import (addComboEdit,
                                          addInputSignalsSection,
+                                         addOutputSignalsSection,
                                          createComboEdit,
                                          createLineEdit,
                                          defineSaveCancelButtons,
@@ -106,6 +107,10 @@ class MessageGAM(MARTe2GAM):
         spacer = QWidget()
         spacer.setSizePolicy(QSizePolicy.Expanding, QSizePolicy.Minimum)
         addInputSignalsSection(mainpanel_instance, node, False, False)
+        app_def = mainpanel_instance.parent.API.getServiceByName('ApplicationDefinition')
+        datasource = app_def.configuration['misc']['gamsources'][0]
+        addOutputSignalsSection(mainpanel_instance, node, 3, False, datasource=datasource)
+
         mainpanel_instance.configbarBox.addWidget(spacer, 0, 2)
 
         addComboEdit(mainpanel_instance, node, 'Trigger on Change: ',
@@ -283,7 +288,9 @@ class EventsWindow(QMainWindow):
         ''' Add a trigger to our message '''
         event = self.eventname.text()
         index = findIndexByDictKey(self.events['objects'], 'configuration_name', event)
+        # Now check if events already existed
         if not self.events['objects'][index]['eventtriggers']:
+            # They didnt so enable the events boxes
             recursivelySetEnabled(self.trig_panel_wgt.right_panel_vlayout, True)
         try:
             # In future this should get the next unique label name -
@@ -293,9 +300,9 @@ class EventsWindow(QMainWindow):
             while count < len(self.node.inputs):
                 if textExistsInListWidget(self.trig_panel_wgt.left_list,
                                           self.node.inputs[count].label):
-                    count += 1
                     continue
                 defaultsignal = self.node.inputs[count].label
+                count += 1
 
             if defaultsignal is None:
                 showErrorDialog("All available signals have defined triggers")
@@ -305,9 +312,9 @@ class EventsWindow(QMainWindow):
  to select as the trigger source.""")
             return
         new_trigger = QListWidgetItem(defaultsignal)
+        self.events['objects'][index]['eventtriggers'][defaultsignal] = '0'
         self.trig_panel_wgt.left_list.addItem(new_trigger)
         self.trig_panel_wgt.left_list.setCurrentItem(new_trigger)
-        self.events['objects'][index]['eventtriggers'][defaultsignal] = '0'
         # Now set the lineedit values
         index = self.trig_sig.findText(defaultsignal)
         self.trig_sig.currentIndexChanged.disconnect()
