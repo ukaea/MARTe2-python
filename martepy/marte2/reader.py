@@ -85,14 +85,14 @@ def buildTree(content):
             current_node = new_node
         elif stripped_line.strip().endswith("}"):
             if '=' in stripped_line and '+' not in stripped_line:
-                key, value = stripped_line.split("=")
+                key, value = stripped_line.split("=", 1)
                 key = key.strip()
                 value = value.strip()
                 current_node.addParameter(key, value)
                 continue
             current_node = current_node.parent
         elif "=" in stripped_line:
-            key, value = stripped_line.split("=")
+            key, value = stripped_line.split("=", 1)
             key = key.strip()
             value = value.strip()
             if stripped_line.strip(' ').endswith('\\n'):
