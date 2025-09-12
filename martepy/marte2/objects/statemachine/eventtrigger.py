@@ -33,10 +33,10 @@ class MARTe2EventConditionTrigger(MARTe2ConfigObject):
     def write(self, config_writer):
         ''' Write the configuration of our object '''
         config_writer.startClass('+' + getname(self), self.class_name)
-        config_writer.startSection('EventTriggers')
+        config_writer.startSection('EventTrigger')
         for key, value in self.eventtriggers.items():
             config_writer.writeNode(key, str(value))
-        config_writer.endSection('EventTriggers')
+        config_writer.endSection('EventTrigger')
         for obj in self.objects:
             obj.write(config_writer)
         config_writer.endSection('+' + getname(self))

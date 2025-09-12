@@ -153,7 +153,7 @@ def getSignals(function_def, formatter):
 def readApplication(file_path, readFunc=buildTree):
     ''' Read an application given a file path - wrapper around the parse file function '''
     file_content = parseFile(file_path)
-    return readApplicationText(file_content, readFunc=buildTree)
+    return readApplicationText(file_content, readFunc=readFunc)
 
 class UnrecognisedParameterException(Exception):
     ''' Exception that should be thrown when an unknown parameter in a tree occurs '''
@@ -381,7 +381,7 @@ def getStates(application_definition, function_map, app):
                 cpus = int(float.fromhex(cpus))
             else:
                 cpus = int(cpus)
-                functions = '{ }'
+            functions = '{ }'
             if 'Functions' in list(thread.parameters.keys()):
                 functions = thread.parameters['Functions']
             functions = functions.strip('{').strip('}').split(' ')
