@@ -62,7 +62,7 @@ def test_MARTe2EventConditionTrigger(configuration_name, eventtriggers, objects)
         newline = ''
     assert str(setup_writer) == f'''+{configuration_name} = {{
     Class = EventConditionTrigger
-    EventTriggers = {{
+    EventTrigger = {{
 {string_content}
     }}
 {str(repr(test_writer))}{newline}}}'''

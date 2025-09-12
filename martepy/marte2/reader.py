@@ -150,10 +150,10 @@ def getSignals(function_def, formatter):
     we universally use '''
     return formatToSignal(next((a for a in function_def.children if a.name == formatter), None))
 
-def readApplication(file_path, readFunc=buildTree):
+def readApplication(file_path, read_func=buildTree):
     ''' Read an application given a file path - wrapper around the parse file function '''
     file_content = parseFile(file_path)
-    return readApplicationText(file_content, readFunc=readFunc)
+    return readApplicationText(file_content, read_func=read_func)
 
 class UnrecognisedParameterException(Exception):
     ''' Exception that should be thrown when an unknown parameter in a tree occurs '''
@@ -304,11 +304,11 @@ def returnFromChildren(children, name):
             return child
     return None
 
-def readApplicationText(file_content, readFunc=buildTree):
+def readApplicationText(file_content, read_func=buildTree): # pylint: disable=R0914
     ''' Given text content, read this in and interpret it into the MARTe2
     Pythonic class representations '''
     app = MARTe2Application()
-    tree_root = readFunc(file_content)
+    tree_root = read_func(file_content)
     # The first set of objects should be anything root level and our application.
     # First let's find our application, we can worry about
     # root level objects later when we incorporate those

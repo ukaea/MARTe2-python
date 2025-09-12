@@ -18,6 +18,7 @@ class MARTe2EventConditionTrigger(MARTe2ConfigObject):
         self.objects = msgs
 
     def parseUnknown(self, obj):
+        ''' Used to parse unknown objects when unpacking from files '''
         for key, value in obj.parameters.items():
             self.eventtriggers[key] = value
 
