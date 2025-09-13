@@ -32,8 +32,8 @@ class SimulinkGAM(MARTe2GAM):
         self.library = library
         self.symbolprefix = symbolprefix
         self.verbosity = Verbosity
-        self.skipinvalidtunableparams = skipinvalidtunableparams
-        self.enforcemodelsignalcoverage = EnforceModelSignalCoverage
+        self.skipinvalidtunableparams = int(skipinvalidtunableparams)
+        self.enforcemodelsignalcoverage = int(EnforceModelSignalCoverage)
         self.tunableparamexternalsource = TunableParamExternalSource
         self.nonvirtualbusmode = NonVirtualBusMode
         self.parameters = []
@@ -159,8 +159,8 @@ class SimulinkGAM(MARTe2GAM):
         self.library = data['parameters']["library"]
         self.symbolprefix = data['parameters']["symbolprefix"]
         self.verbosity = data['parameters']["verbosity"]
-        self.skipinvalidtunableparams = data['parameters']["skipinvalidtunableparams"]
-        self.enforcemodelsignalcoverage = data['parameters']["enforcemodelsignalcoverage"]
+        self.skipinvalidtunableparams = int(data['parameters']["skipinvalidtunableparams"])
+        self.enforcemodelsignalcoverage = int(data['parameters']["enforcemodelsignalcoverage"])
         self.tunableparamexternalsource = data['parameters']["tunableparamexternalsource"]
         self.nonvirtualbusmode = data['parameters']["nonvirtualbusmode"]
         self.parameters = data['parameters']['parameters']

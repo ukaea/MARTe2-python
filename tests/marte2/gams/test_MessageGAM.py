@@ -68,9 +68,12 @@ def test_MessageGAM(configuration_name, events, triggeron, input_signals, output
 
     example_messagegam.loadParameters(load_parameters, GAMNode(example_messagegam))
 
-    classes = [QLabel, QLineEdit, QPushButton, QWidget, QLabel, QComboBox, QPushButton, QWidget]
-    default_text = ['Number of input signals: ', str(len(input_signals)), 'Configure Signals', '', 'Trigger on Change: ',str(triggeron), 'Configure Events','']
-    test_text = [True, True, True, False, True, False, True, False]
+    classes = [QLabel, QLineEdit, QPushButton,QLabel, QLineEdit, QPushButton, QWidget,
+               QLabel, QComboBox, QPushButton, QWidget]
+    default_text = ['Number of input signals: ', str(len(input_signals)), 'Configure Signals', 'Number of output signals: ',
+                    str(len(output_signals)), 'Configure Signals', '', 'Trigger on Change: ',
+                    str(triggeron), 'Configure Events','']
+    test_text = [True, True, True, True, True, True, False, True, False, True, False]
     assert len(load_parameters.configbarBox) == len(classes)
     for i in range(len(classes)):
         assert load_parameters.configbarBox.itemAt(i).widget().__class__ == classes[i]
@@ -95,14 +98,12 @@ def test_mfactory():
 def test_messageGAM_GUI(qapp, load_parameters):
     
     test_gam = MessageGAM('test_message_gam', triggeron=1,events=events, input_signals=[('Command1',{'MARTeConfig':{'DataSource':'DDB0','Type':'float32','NumberOfElements':3}})], output_signals=[])
-    load_parameters.parent = QWidget()
-    load_parameters.parent.app = qapp
     node = GAMNode(test_gam)
     node.inputs = [emptyObject()]
     node.inputs[0].label = 'Signal1'
     test_gam.loadParameters(load_parameters, node)
-    load_parameters.configbarBox.itemAt(6).widget().clicked.emit()
-
+    load_parameters.parent.app = qapp
+    load_parameters.configbarBox.itemAt(9).widget().clicked.emit()
     event_wdw = load_parameters.parent.newwindow
 
     assert event_wdw.main_wgt.left_list.item(0).text() == 'NewEvent'

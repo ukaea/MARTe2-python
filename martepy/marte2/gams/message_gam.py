@@ -125,14 +125,14 @@ class MessageGAM(MARTe2GAM):
 
 class EventsWindow(QMainWindow):
     ''' Event Configuration window for the MessageGAM '''
-    def __init__(self, parent=None, node=None):
-        super().__init__(parent)
+    def __init__(self, parent_wdw=None, node=None):
+        super().__init__()
         self.node = node
         self.events = copy.deepcopy(self.node.parameters['events'])
         self.setWindowTitle(f"Events configuration for: {getname(self.node)}")
 
         self.msg_window = None
-        setSize(self, self.parent().app, 0.225,0.25,0.55,0.5)
+        setSize(self, parent_wdw.app, 0.225,0.25,0.55,0.5)
 
         self.main_wgt = PanelledListConfig(self, 0.25, 0.75)
 

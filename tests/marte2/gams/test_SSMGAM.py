@@ -20,44 +20,44 @@ from ...utilities import *
 )
 def test_SSMGAM(configuration_name, feedthroughmatrix, inputmatrix, outputmatrix, resetineachstate, samplefrequency, statematrix, input_signals, output_signals, load_parameters):
     setup_writer = marteconfig.StringConfigWriter()
-    example_ssmgam = SSMGAM(configuration_name, feedthroughmatrix=feedthroughmatrix, input_matrix=inputmatrix, output_matrix=outputmatrix, reset_each_state=resetineachstate, samplefreq=samplefrequency, state_matrix=statematrix, input_signals=input_signals, output_signals=output_signals)
+    example_simgam = SSMGAM(configuration_name, feedthroughmatrix=feedthroughmatrix, input_matrix=inputmatrix, output_matrix=outputmatrix, reset_each_state=resetineachstate, samplefreq=samplefrequency, state_matrix=statematrix, input_signals=input_signals, output_signals=output_signals)
     
     # Assert attributes
-    assert example_ssmgam.configuration_name == configuration_name
-    assert example_ssmgam.feedthroughmatrix == feedthroughmatrix
-    assert example_ssmgam.inputmatrix == inputmatrix
-    assert example_ssmgam.outputmatrix == outputmatrix
-    assert example_ssmgam.resetineachstate == resetineachstate
-    assert example_ssmgam.samplefrequency == samplefrequency
-    assert example_ssmgam.statematrix == statematrix
-    assert example_ssmgam.output_signals == output_signals
-    assert example_ssmgam.input_signals == input_signals
+    assert example_simgam.configuration_name == configuration_name
+    assert example_simgam.feedthroughmatrix == feedthroughmatrix
+    assert example_simgam.inputmatrix == inputmatrix
+    assert example_simgam.outputmatrix == outputmatrix
+    assert example_simgam.resetineachstate == resetineachstate
+    assert example_simgam.samplefrequency == samplefrequency
+    assert example_simgam.statematrix == statematrix
+    assert example_simgam.output_signals == output_signals
+    assert example_simgam.input_signals == input_signals
 
     # Assert Serializations
-    assert example_ssmgam.serialize()['configuration_name'] == configuration_name
-    assert example_ssmgam.serialize()['parameters']['feedthroughmatrix'] == feedthroughmatrix
-    assert example_ssmgam.serialize()['parameters']['inputmatrix'] == inputmatrix
-    assert example_ssmgam.serialize()['parameters']['outputmatrix'] == outputmatrix
-    assert example_ssmgam.serialize()['parameters']['resetineachstate'] == int(resetineachstate)
-    assert example_ssmgam.serialize()['parameters']['samplefrequency'] == float(samplefrequency)
-    assert example_ssmgam.serialize()['parameters']['statematrix'] == statematrix
-    assert example_ssmgam.serialize()['inputsb'] == input_signals
-    assert example_ssmgam.serialize()['outputsb'] == output_signals
+    assert example_simgam.serialize()['configuration_name'] == configuration_name
+    assert example_simgam.serialize()['parameters']['feedthroughmatrix'] == feedthroughmatrix
+    assert example_simgam.serialize()['parameters']['inputmatrix'] == inputmatrix
+    assert example_simgam.serialize()['parameters']['outputmatrix'] == outputmatrix
+    assert example_simgam.serialize()['parameters']['resetineachstate'] == int(resetineachstate)
+    assert example_simgam.serialize()['parameters']['samplefrequency'] == float(samplefrequency)
+    assert example_simgam.serialize()['parameters']['statematrix'] == statematrix
+    assert example_simgam.serialize()['inputsb'] == input_signals
+    assert example_simgam.serialize()['outputsb'] == output_signals
 
     # Assert Deserialization
-    new_ssmgam = SSMGAM().deserialize(example_ssmgam.serialize())
-    assert new_ssmgam.configuration_name.lstrip('+') == configuration_name
-    assert new_ssmgam.feedthroughmatrix == feedthroughmatrix
-    assert new_ssmgam.inputmatrix == inputmatrix
-    assert new_ssmgam.outputmatrix == outputmatrix
-    assert new_ssmgam.resetineachstate == int(resetineachstate)
-    assert new_ssmgam.samplefrequency == float(samplefrequency)
-    assert new_ssmgam.statematrix == statematrix
-    assert new_ssmgam.output_signals == output_signals
-    assert new_ssmgam.input_signals == input_signals
+    new_simgam = SSMGAM().deserialize(example_simgam.serialize())
+    assert new_simgam.configuration_name.lstrip('+') == configuration_name
+    assert new_simgam.feedthroughmatrix == feedthroughmatrix
+    assert new_simgam.inputmatrix == inputmatrix
+    assert new_simgam.outputmatrix == outputmatrix
+    assert new_simgam.resetineachstate == int(resetineachstate)
+    assert new_simgam.samplefrequency == float(samplefrequency)
+    assert new_simgam.statematrix == statematrix
+    assert new_simgam.output_signals == output_signals
+    assert new_simgam.input_signals == input_signals
 
     # Assert config written
-    example_ssmgam.write(setup_writer)
+    example_simgam.write(setup_writer)
     test_writer = writeSignals_section(input_signals, output_signals)
 
     assert str(setup_writer) == f'''+{configuration_name} = {{\n    Class = SSMGAM
@@ -69,7 +69,7 @@ def test_SSMGAM(configuration_name, feedthroughmatrix, inputmatrix, outputmatrix
     SampleFrequency = {samplefrequency}
 {str(test_writer)}\n}}'''
 
-    example_ssmgam.loadParameters(load_parameters, GAMNode(example_ssmgam))
+    example_simgam.loadParameters(load_parameters, GAMNode(example_simgam))
 
     
     classes = [QLabel, QLineEdit, QPushButton, QLabel, QLineEdit, QPushButton,
