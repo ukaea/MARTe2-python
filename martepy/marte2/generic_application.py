@@ -8,7 +8,7 @@ from martepy.functions.gam_functions import (addAlias, addDimensions, assignUniq
                                              getKeyAttribute, setDatasource,
                                              setKeyAttribute,
                                              removeKeysFromConfig)
-from martepy.functions.extra_functions import getname, type_sizes, compute_type_size
+from martepy.functions.extra_functions import getname, type_sizes, computeTypeSizes
 from martepy.marte2.gams.iogam import IOGAM
 from martepy.marte2.datasources.gam_datasource import GAMDataSource
 from martepy.marte2.factory import Factory
@@ -187,12 +187,13 @@ class MARTe2Application():
         ''' Add type sizes from the type database if used.
         Needs recursive resolution with cycle/forward-reference
         handling '''
+        sizes = {}
         if typedb:
             cache = {}
             sizes = {}
             for name, type_obj in typedb.types.items():
-                sizes[name] = compute_type_size(type_obj, typedb.types, cache)
-            return sizes
+                sizes[name] = computeTypeSizes(type_obj, typedb.types, cache)
+        return sizes
 
     def onlyErrors(self, typedb=None): # pylint:disable=R0914, R0915, R0912
         ''' Check our application for any errors given what we know, if we were to run this

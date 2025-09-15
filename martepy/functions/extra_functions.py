@@ -111,7 +111,7 @@ type_sizes = {
     "float64": 8,
 }
 
-def compute_type_size(type_obj, mapping, cache=None, stack=None):
+def computeTypeSizes(type_obj, mapping, cache=None, stack=None):
     """
     Recursively compute the size of a Type object.
     
@@ -156,7 +156,7 @@ def compute_type_size(type_obj, mapping, cache=None, stack=None):
                 if field_type_name not in mapping:
                     raise KeyError(f"Unknown type reference: {field_type_name}")
                 field_type = mapping[field_type_name]
-                field_size = compute_type_size(field_type, mapping, cache, stack)
+                field_size = computeTypeSizes(field_type, mapping, cache, stack)
 
             size += field.noelements * field_size
 
