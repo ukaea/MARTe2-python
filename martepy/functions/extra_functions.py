@@ -1,4 +1,4 @@
-"""extra_functions.py contains additional useful functions"""
+﻿"""extra_functions.py contains additional useful functions"""
 
 
 class ConfigGeneratorError(Exception):
@@ -95,3 +95,72 @@ def form(sig_name, type_, num=None, datasource='DDB0', alias=None, default=None)
     if num:
         formatted[0][1]['MARTeConfig']['NumberOfElements'] = num
     return formatted
+
+type_sizes = {
+    "uint8": 1,
+    "int8": 1,
+    "char": 1,
+    "bool": 1,
+    "uint16": 2,
+    "int16": 2,
+    "uint32": 4,
+    "int32": 4,
+    "uint64": 8,
+    "int64": 8,
+    "float32": 4,
+    "float64": 8,
+}
+
+def compute_type_size(type_obj, mapping, cache=None, stack=None):
+    """
+    Recursively compute the size of a Type object.
+    
+    Args:
+        type_obj (Type): the Type to compute size for
+        mapping (dict[str, Type]): dictionary of all types
+        cache (dict): memoization dictionary
+        stack (set): recursion guard
+    
+    Returns:
+        int: total size in bytes
+    """
+    if cache is None:
+        cache = {}
+    if stack is None:
+        stack = set()
+
+    # Already computed?
+    if type_obj.name in cache:
+        return cache[type_obj.name]
+
+    # Detect cycles (struct containing itself)
+    if type_obj.name in stack:
+        raise ValueError(f"Cycle detected in type definition: {type_obj.name}")
+    stack.add(type_obj.name)
+
+    if type_obj.fundamental:
+        # Fundamental: lookup size directly
+        size = type_sizes.get(type_obj.name)
+        if size is None:
+            raise ValueError(f"Unknown fundamental type: {type_obj.name}")
+    else:
+        # Composite type: sum field sizes
+        size = 0
+        for field in type_obj.fields:
+            field_type_name = field.type
+            # fundamental?
+            if field_type_name in type_sizes:
+                field_size = type_sizes[field_type_name]
+            else:
+                # must be another user-defined type
+                if field_type_name not in mapping:
+                    raise KeyError(f"Unknown type reference: {field_type_name}")
+                field_type = mapping[field_type_name]
+                field_size = compute_type_size(field_type, mapping, cache, stack)
+
+            size += field.noelements * field_size
+
+    # Save result
+    cache[type_obj.name] = size
+    stack.remove(type_obj.name)
+    return size

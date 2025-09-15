@@ -8,7 +8,7 @@ from martepy.functions.gam_functions import (addAlias, addDimensions, assignUniq
                                              getKeyAttribute, setDatasource,
                                              setKeyAttribute,
                                              removeKeysFromConfig)
-from martepy.functions.extra_functions import getname
+from martepy.functions.extra_functions import getname, type_sizes, compute_type_size
 from martepy.marte2.gams.iogam import IOGAM
 from martepy.marte2.datasources.gam_datasource import GAMDataSource
 from martepy.marte2.factory import Factory
@@ -183,13 +183,25 @@ class MARTe2Application():
                     break
         return name
 
-    def onlyErrors(self): # pylint:disable=R0914, R0915, R0912
+    def defineTypeSizes(self, typedb):
+        ''' Add type sizes from the type database if used.
+        Needs recursive resolution with cycle/forward-reference
+        handling '''
+        if typedb:
+            cache = {}
+            sizes = {}
+            for name, type_obj in typedb.types.items():
+                sizes[name] = compute_type_size(type_obj, typedb.types, cache)
+            return sizes
+
+    def onlyErrors(self, typedb=None): # pylint:disable=R0914, R0915, R0912
         ''' Check our application for any errors given what we know, if we were to run this
         configuration now, what would MARTe2 error/say? '''
         exceptions = []
         consumed = {}
         produced = {}
         function_names = []
+        type_sizes.update(self.defineTypeSizes(typedb))
         # Signal names of same name within same function - use MARTeApplication.getAlias
         for function in self.functions:
             # Same named functions in application
@@ -223,12 +235,6 @@ signal repeated within function: {function.configuration_name.lstrip('+')}"""))
             # Perform a check on IOGAM and the same bytes in as bytes out
             if function.class_name == 'IOGAM':
                 def calculateTotalBytes(signals):
-                    type_sizes = {
-                        'uint8': 1, 'int8': 1,
-                        'uint16': 2, 'int16': 2,
-                        'uint32': 4, 'int32': 4, 'float32': 4,
-                        'uint64': 8, 'int64': 8, 'float64': 8
-                    }
                     total = 0
                     for signal in signals:
                         _, config = signal
