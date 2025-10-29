@@ -1,4 +1,4 @@
-''' The basic definition for a MARTe2 python datasource object '''
+''' The basic definition for a MARTe2 python interface object '''
 
 import logging
 import copy
@@ -6,13 +6,13 @@ from martepy.marte2.config_object import MARTe2ConfigObject
 
 logger = logging.getLogger(__name__)
 
-class MARTe2DataSource(MARTe2ConfigObject):
-    """Object for configuring DataSource Instances"""
+class MARTe2Interface(MARTe2ConfigObject):
+    """Object for configuring GAMs for MARTe2RealTimeThread instances"""
 
-    plugin = 'marte2_datasources'
+    plugin = 'marte2_interfaces'
     def __init__(self,
-                    configuration_name: str = 'datasource',
-                    class_name: str = 'UnknownDataSource',
+                    configuration_name: str = 'interface',
+                    class_name: str = 'UnknownInterface',
                     input_signals: list = [],
                     output_signals: list = [],
                 ):
@@ -22,8 +22,8 @@ class MARTe2DataSource(MARTe2ConfigObject):
         self.input_signals = list(input_signals)
         self.output_signals = list(output_signals)
 
-    def writeDatasourceConfig(self, config_writer):
-        ''' Needs implementing but how to write the datasource '''
+    def writeInterfaceConfig(self, config_writer):
+        ''' Needs implementing but how to write the interface '''
         raise NotImplementedError()
 
     def writeInputSignals(self, config_writer, section_name='InputSignals'):
@@ -41,14 +41,14 @@ class MARTe2DataSource(MARTe2ConfigObject):
             config_writer.endSection(section_name)
 
     def write(self, config_writer):
-        ''' Default method of writing the datasource - assuming you have written the
-        writeDatasourceConfig '''
+        ''' Default method of writing the interface - assuming you have written the
+        writeInterfaceConfig '''
         config_writer.startClass('+' + self.configuration_name.strip('+'), self.class_name)
-        self.writeDatasourceConfig(config_writer)
+        self.writeInterfaceConfig(config_writer)
         config_writer.endSection('+' + self.configuration_name.strip('+'))
 
     def writeSignals(self, defs, config_writer): # pylint: disable=W0237, W0221
-        """Use MARTe1ConfigObject.writeSignals but remove any DataSources."""
+        """Use MARTe1ConfigObject.writeSignals but remove any Interfaces."""
         super().writeSignals([(
                 n,
                 dict(d, **{'MARTeConfig': {
@@ -78,7 +78,7 @@ class MARTe2DataSource(MARTe2ConfigObject):
         res['block_type'] = self.class_name
         res['comment'] = self.comment
         res['rank'] = False
-        res['plugin'] = 'marte2_datasources'
+        res['plugin'] = 'marte2_interfaces'
         res['label'] = self.class_name
         res['parameters'] = {}
         res['content'] = {}
@@ -91,9 +91,9 @@ class MARTe2DataSource(MARTe2ConfigObject):
         res['pos_y'] = 0
         return copy.deepcopy(res)
 
-    def deserialize(self, data: dict, hashmap: dict={}, restore_id: bool=True) -> bool: # pylint: disable=W0221
+    def deserialize(self, data: dict) -> bool: # pylint: disable=W0221
         ''' Deserialize our object from a dictionary '''
-        super().deserialize(data, hashmap, restore_id)
+        super().deserialize(data)
         #self.class_name = data['class_name']
         self.configuration_name = "+" + data['configuration_name'].strip('+')
         self.input_signals = data["inputsb"]

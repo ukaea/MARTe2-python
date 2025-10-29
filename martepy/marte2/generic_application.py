@@ -203,6 +203,13 @@ class MARTe2Application():
         produced = {}
         function_names = []
         type_sizes.update(self.defineTypeSizes(typedb))
+        # Check that all interfaces are unique
+        interface_names = []
+        for objec in self.objects:
+            if objec.configuration_name.lstrip('+') in interface_names:
+                exceptions.append(MARTe2Exception("""Two objects/interfaces exist in the configuration
+with the same name."""))
+            interface_names.append(objec.configuration_name.lstrip('+'))
         # Signal names of same name within same function - use MARTeApplication.getAlias
         for function in self.functions:
             # Same named functions in application

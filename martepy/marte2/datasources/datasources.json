@@ -11,6 +11,7 @@
   "LinuxTimer": "martepy.marte2.datasources.linux_timer",
   "LoggerDataSource": "martepy.marte2.datasources.logger_datasource",
   "Timings": "martepy.marte2.datasources.timing_datasource",
-  "AsyncBridge": "martepy.marte2.datasources.async_bridge"
+  "AsyncBridge": "martepy.marte2.datasources.async_bridge",
+  "Synchronisation": "martepy.marte2.datasources.rt_syncbridge"
 }
   
