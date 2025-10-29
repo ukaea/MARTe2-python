@@ -30,6 +30,7 @@ include = ["martepy", "martepy.*"]
 
 [tool.setuptools.package-data]
 "martepy.marte2.datasources" = ["*.json", "martepy/marte2/datasources/datasources.json"]
+"martepy.marte2.interfaces" = ["*.json", "martepy/marte2/interfaces/interfaces.json"]
 "martepy.marte2.gams" = ["*.json", "martepy/marte2/gams/gams.json"]
 "martepy.marte2.objects" = ["*.json", "martepy/marte2/objects/objects.json"]
 "martepy.frameworks" = ["*.json", "martepy/frameworks/end.json"]
