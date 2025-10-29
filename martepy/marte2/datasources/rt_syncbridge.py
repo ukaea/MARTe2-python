@@ -38,9 +38,9 @@ class Synchronisation(MARTe2DataSource):
 
     def writeDatasourceConfig(self, config_writer):
         ''' Write the datasource configuration to the cfg. '''
-        config_writer.writeNode('Timeout', '"{}"'.format(self.timeout))
-        config_writer.writeNode('PrintOverwrite', '"{}"'.format(self.printoverwrite))
-        config_writer.writeNode('WaitForNext', '"{}"'.format(self.waitfornext))
+        config_writer.writeNode('Timeout', f'{self.timeout}')
+        config_writer.writeNode('PrintOverwrite', f'{self.printoverwrite}')
+        config_writer.writeNode('WaitForNext', f'{self.waitfornext}')
 
     def serialize(self):
         ''' Serialize the datasource object '''
@@ -159,7 +159,7 @@ class Synchronisation(MARTe2DataSource):
 
         def draw(mainpanel_instance, node, type_input):
             removeWidgetsExceptRow0(mainpanel_instance.configbarBox)
-            addSignalsSection(mainpanel_instance, node, type_input=not(node.parameters['input']))
+            addSignalsSection(mainpanel_instance, node, type_input=not node.parameters['input'])
 
             wgt_label = QLabel("Read/Write: ")
             wgt_field = QComboBox(mainpanel_instance)
@@ -173,9 +173,11 @@ class Synchronisation(MARTe2DataSource):
 
             addLineEdit(mainpanel_instance, node,"Timeout: ", 'timeout', 3, 0)
 
-            addComboEdit(mainpanel_instance, node,"Print Overwrite?: ", 'printoverwrite', 3, 2, ['yes', 'no'])
+            addComboEdit(mainpanel_instance, node,"Print Overwrite?: ",
+                         'printoverwrite', 3, 2, ['yes', 'no'])
 
-            addComboEdit(mainpanel_instance, node,"Wait For Next?: ", 'waitfornext', 4, 0, ['yes', 'no'])
+            addComboEdit(mainpanel_instance, node,"Wait For Next?: ",
+                         'waitfornext', 4, 0, ['yes', 'no'])
 
         draw(mainpanel_instance, node, type_input)
 

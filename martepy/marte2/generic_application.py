@@ -207,8 +207,8 @@ class MARTe2Application():
         interface_names = []
         for objec in self.objects:
             if objec.configuration_name.lstrip('+') in interface_names:
-                exceptions.append(MARTe2Exception("""Two objects/interfaces exist in the configuration
-with the same name."""))
+                exceptions.append(MARTe2Exception("""Two objects/interfaces exist in the
+configuration with the same name."""))
             interface_names.append(objec.configuration_name.lstrip('+'))
         # Signal names of same name within same function - use MARTeApplication.getAlias
         for function in self.functions:
