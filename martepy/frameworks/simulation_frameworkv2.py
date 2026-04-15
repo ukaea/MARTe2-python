@@ -36,6 +36,7 @@ from martepy.marte2.datasources.gam_datasource import GAMDataSource
 from martepy.marte2.datasources.files.reader import FileReader
 from martepy.frameworks.end_gam import EndGAM
 from martepy.marte2.datasources.async_bridge import AsyncBridge
+from martepy.marte2.datasources.rt_syncbridge import Synchronisation
 
 class SimulationGenerator():
     ''' This class is the simulation generator, it takes a pre-defined MARTe2Application instance,
@@ -97,13 +98,15 @@ class SimulationGenerator():
 
         self._internal_datasources = [a.configuration_name.lstrip('+') for a in
                                  self.original_app.additional_datasources if isinstance(a, (
-                                     AsyncBridge, FileReader, GAMDataSource, TimingDataSource))]
+                                     AsyncBridge, FileReader, Synchronisation, 
+                                     GAMDataSource, TimingDataSource))]
 
         self._internal_datasources += [self.misc_ddb, self.log_ddb, self.constants_ddb]
         self._internal_datasources += [a.configuration_name.replace('+','') for a in linux_timers]
         # Ensure we know what we removed
         self.replaced_datasources = [a for a in self.original_app.additional_datasources if not (
-            isinstance(a, (AsyncBridge, FileReader, GAMDataSource, LinuxTimer, TimingDataSource)))]
+            isinstance(a, (AsyncBridge, Synchronisation, FileReader,
+                           GAMDataSource, LinuxTimer, TimingDataSource)))]
 
     def _createGamSources(self):
         ''' Define the GAMSources that are used to partition signals '''

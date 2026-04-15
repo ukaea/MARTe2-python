@@ -15,6 +15,7 @@ from martepy.marte2.factory import Factory
 from martepy.marte2.type_database import TypeDBv2 as TypeDB
 from martepy.marte2.datasources.files.file_datasources import RFileWriter
 from martepy.marte2.datasources.files.writer import FileWriter
+from martepy.marte2.datasources.rt_syncbridge import Synchronisation
 from martepy.marte2.qt_functions import generateUniqueName
 from martepy.marte2.datasources.async_bridge import AsyncBridge
 
@@ -433,13 +434,12 @@ signal/alias: {string} in datasource {datasource_name}"""))
                 filewriter.input_signals += [out_sgl]
         return new_gams
 
-    def _logSignal(self, signal, thread_index: int, state, thread): # pylint: disable=R0914,R0915
+    def _logSignal(self, signal, thread_index: int, state, thread, new_functions): # pylint: disable=R0914,R0915
         ''' This function will log a signal, if it is outside the primary thread
         it will use an Async Bridge to transfer the signal to the primary and then 
         add this to the log. If it is a complex type, it will unflatten the signal type. '''
         # Is not a signal from the outside world and therefore we want to log it
         # into our primary thread and primary FileWriter for the simulation.
-        new_functions = []
         osig_name = getAlias(signal)
         if thread_index == 0:
             # Now we need to add to loggingintoio IOGAM to get this into our
@@ -510,8 +510,9 @@ signal/alias: {string} in datasource {datasource_name}"""))
             # Get the Async Bridge in question
             iobridge = getGamByName(iobridge_name.lstrip('+'), self.io_asyncs)
             # Ensure it has a unique name
+            input_signal = assignUniqueName(input_signal, self.loggingintoio.input_signals)
             if iobridge:
-                assignUniqueName(input_signal, iobridge.input_signals)
+                input_signal = assignUniqueName(input_signal, iobridge.input_signals)
             # Make sure it will still link by alias back to the original
             input_alias = getAlias(signal)
             input_signal[1]['MARTeConfig']['Alias'] = input_alias
@@ -577,6 +578,10 @@ signal/alias: {string} in datasource {datasource_name}"""))
 
         self.additional_datasources += [self.asyncbridge, self.filewriter]
         self.functions += [self.logging_iogam, self.loggingintoio]
+        # Don't log Sync outputs
+        self._internal_datasources = [a.configuration_name.lstrip('+') for a in
+                                 self.additional_datasources if isinstance(a,
+                                     (Synchronisation))]
         for state in self.states:
             if len(state.threads.objects) > 0:
                 state.threads.objects[0].functions += self.iogams
@@ -595,8 +600,8 @@ signal/alias: {string} in datasource {datasource_name}"""))
                         continue
                     for output_signal in function.output_signals:
                         if getDatasource(output_signal) not in self._internal_datasources:
-                            new_functions += self._logSignal(output_signal,
-                                                              thread_index, state, thread)
+                            self._logSignal(output_signal,thread_index, state, thread,
+                                            new_functions)
                 thread.functions += new_functions
 
     def writeToConfig(self, out=None):
