@@ -517,7 +517,10 @@ def createHttpBrowser(http_browser, http_messages):
         if message_interface.children:
             # Has messages defined
             for message in message_interface.children:
-                maxwait = int(message.parameters['MaxWait'].strip('"'))
+                if 'MaxWait' in list(message.parameters.keys()):
+                    maxwait = int(message.parameters['MaxWait'].strip('"'))
+                else:
+                    maxwait = -1
                 new_message = MARTe2Message(message.name,
                                             message.parameters['Destination'].strip('"'),
                                             message.parameters['Function'].strip('"'),
