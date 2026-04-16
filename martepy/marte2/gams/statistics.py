@@ -63,7 +63,7 @@ class StatisticsGAM(MARTe2GAM):
         addLineEdit(mainpanel_instance, node, "Window Size: ", 'windowsize', 3, 0)
 
         addLineEdit(mainpanel_instance, node, "Start Cycle Number: ", 'startcyclenumber', 3, 2)
-        
+
         addLineEdit(mainpanel_instance, node, "Infinite Max Min: ", 'infinitemaxmin', 4, 0)
 
 

@@ -13,6 +13,8 @@ from martepy.marte2.gams.pid import PIDGAM
 from martepy.marte2.gams.waveform_chirp import WaveformChirpGAM
 from martepy.marte2.gams.waveform_points import WaveformPointsGAM
 from martepy.marte2.gams.waveform_sin import WaveformSinGAM
+from martepy.marte2.gams.histogram import HistogramGAM
+from martepy.marte2.gams.statistics import StatisticsGAM
 
 __all__ = [
         'IOGAM',

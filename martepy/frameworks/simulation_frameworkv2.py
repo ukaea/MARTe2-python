@@ -98,7 +98,7 @@ class SimulationGenerator():
 
         self._internal_datasources = [a.configuration_name.lstrip('+') for a in
                                  self.original_app.additional_datasources if isinstance(a, (
-                                     AsyncBridge, FileReader, Synchronisation, 
+                                     AsyncBridge, FileReader, Synchronisation,
                                      GAMDataSource, TimingDataSource))]
 
         self._internal_datasources += [self.misc_ddb, self.log_ddb, self.constants_ddb]
