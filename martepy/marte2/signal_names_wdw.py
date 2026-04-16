@@ -24,7 +24,7 @@ from martepy.functions.extra_functions import getname
 class SignalWdw(QMainWindow):
     ''' The configurable signal window where the user can configure signals in XMARTe2. '''
     def __init__(self, parent=None, node=None, hasdefault=False, epics=False,
-                 samples=False, io='output', buses=False):
+                 samples=False, io='output', buses=False, lims=False):
         if node is None:
             raise ValueError("Node cannot be null")
         super().__init__(parent)
@@ -33,6 +33,10 @@ class SignalWdw(QMainWindow):
         self.epics = epics
         self.bus = buses
         self.samples = samples
+        self.samplescol = 0
+        self.minlim = 0
+        self.maxlim = 0
+        self.lims = lims
         self.io = io
         self.app = node.application.app
         self.setWindowTitle("Signal Configuration")
@@ -79,9 +83,18 @@ class SignalWdw(QMainWindow):
             for row in range(self.signal_tbl.rowCount()):
                 for i in range(0,colcount):
                     item = self.signal_tbl.item(row, i)
-                    item.setFlags(item.flags() & ~Qt.ItemIsEditable)
-                item = self.signal_tbl.item(row, colcount-1)
-                item.setFlags(item.flags() & ~Qt.ItemIsEditable)
+                    if item:
+                        item.setFlags(item.flags() & ~Qt.ItemIsEditable)
+                item = self.signal_tbl.item(row, self.samplescol)
+                if item:
+                    item.setFlags(item.flags() | Qt.ItemIsEditable)
+                if self.lims:
+                    item = self.signal_tbl.item(row, self.minlim)
+                    if item:
+                        item.setFlags(item.flags() | Qt.ItemIsEditable)
+                    item = self.signal_tbl.item(row, self.maxlim)
+                    if item:
+                        item.setFlags(item.flags() | Qt.ItemIsEditable)
 
     def handleIo(self):
         ''' Handle whether our signal is an input and therefore the user cannot 
@@ -114,6 +127,14 @@ class SignalWdw(QMainWindow):
         if self.samples:
             headers.append('Samples')
             header_cnt += 1
+            self.samplescol = header_cnt + 5
+        if self.lims:
+            headers.append('MinLim')
+            header_cnt += 1
+            self.minlim = header_cnt + 5
+            headers.append('MaxLim')
+            header_cnt += 1
+            self.maxlim = header_cnt + 5
         return header_cnt
 
     def createSignalRow(self, signal, is_datasource, row_num): # pylint: disable=R0914
@@ -157,6 +178,14 @@ class SignalWdw(QMainWindow):
         if self.samples:
             samples = getSetKey('Samples', signal[0])
             self.signal_tbl.setItem(row_num, colcount, QTableWidgetItem(samples))
+            colcount += 1
+        if self.lims:
+            minlim = getSetKey('MinLim', signal[0])
+            self.signal_tbl.setItem(row_num, colcount, QTableWidgetItem(minlim))
+            colcount += 1
+        if self.lims:
+            maxlim = getSetKey('MaxLim', signal[0])
+            self.signal_tbl.setItem(row_num, colcount, QTableWidgetItem(maxlim))
             colcount += 1
 
         del_button = QPushButton()
@@ -281,6 +310,11 @@ class SignalWdw(QMainWindow):
                 colcount += 1
             if self.samples:
                 config['MARTeConfig']['Samples'] = self.signal_tbl.item(row, colcount).text()
+                colcount += 1
+            if self.lims:
+                config['MARTeConfig']['MinLim'] = self.signal_tbl.item(row, colcount).text()
+                colcount += 1
+                config['MARTeConfig']['MaxLim'] = self.signal_tbl.item(row, colcount).text()
             sockets = self.node.outputs if self.io == 'output' else self.node.inputs
             for edge in sockets[row].edges:
                 try:

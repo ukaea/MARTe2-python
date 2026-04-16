@@ -11,6 +11,8 @@
   "waveformpoints": "martepy.marte2.gams.waveform_points",
   "pid": "martepy.marte2.gams.pid",
   "filter": "martepy.marte2.gams.filter",
-  "simulink": "martepy.marte2.gams.simulink_gam"
+  "simulink": "martepy.marte2.gams.simulink_gam",
+  "histogram": "martepy.marte2.gams.histogram",
+  "statistics": "martepy.marte2.gams.statistics"
 }
   

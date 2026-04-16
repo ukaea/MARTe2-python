@@ -206,7 +206,7 @@ def addSignalsSection(mainpanel_instance, node, default=False,
     mainpanel_instance.configbarBox.addWidget(spacerwgt, 1, colcount)
 
 def addInputSignalsSection(mainpanel_instance, node, pack=True, samples=False,
-                           datasource=None, epics=False, buses=False):
+                           datasource=None, epics=False, buses=False, lims=False):
     ''' Add an input signal selection item to a node panel '''
     lbl_wgt = QLabel("Number of input signals: ")
     no_signals_wgt = QLineEdit(mainpanel_instance)
@@ -228,7 +228,7 @@ def addInputSignalsSection(mainpanel_instance, node, pack=True, samples=False,
                 bus = True
         fixSignals(node)
         config_signals = SignalWdw(mainpanel_instance, node, False,
-                                   epics, samples,'input', buses=bus)
+                                   epics, samples,'input', buses=bus, lims=lims)
         node.application.newwindow = config_signals
         config_signals.show()
 
