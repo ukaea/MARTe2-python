@@ -65,6 +65,9 @@ def buildTree(content):
     key = ''
     for line in lines:
         stripped_line = line.lstrip(' ')
+        stripped_line = stripped_line.split("//", 1)[0]
+        if not stripped_line.strip():
+            continue
         if building:
             current_line += stripped_line
             if not stripped_line.strip().endswith('\\n'):
@@ -79,6 +82,7 @@ def buildTree(content):
             continue
         if stripped_line.strip().endswith('{'):
             # Start of a new TreeNode
+            
             name = stripped_line.split('=')[0].strip()
             new_node = TreeNode(name, current_node)
             current_node.addChild(new_node)
