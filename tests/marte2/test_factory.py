@@ -18,7 +18,7 @@ def test_factory():
                                 'WaveformSinGAM': WaveformSinGAM, 'WaveformGAM::WaveformChirp': WaveformChirpGAM,
                                 'WaveformChirp': WaveformChirpGAM, 'WaveformChirpGAM': WaveformChirpGAM,
                                 'WaveformGAM::WaveformPointsDef': WaveformPointsGAM, 'WaveformPointsDef': WaveformPointsGAM,
-                                'WaveformPointsGAM': WaveformPointsGAM, 'PIDGAM': PIDGAM, 'FilterGAM': FilterGAM}
+                                'WaveformPointsGAM': WaveformPointsGAM, 'PIDGAM': PIDGAM, 'FilterGAM': FilterGAM, 'HistogramGAM': HistogramGAM, 'StatisticsGAM' : StatisticsGAM}
 
     assert test_obj.classes == classes
 
@@ -41,7 +41,7 @@ def test_factory():
 
     assert test_obj.getAll() == [ConstantGAM, ConversionGAM, ExpressionGAM, ExpressionGAM, IOGAM, MessageGAM, MuxGAM,
                                  WaveformSinGAM, WaveformSinGAM, WaveformSinGAM, WaveformChirpGAM, WaveformChirpGAM, WaveformChirpGAM,
-                                 WaveformPointsGAM, WaveformPointsGAM, WaveformPointsGAM, PIDGAM, FilterGAM, SimulinkGAM, SimulinkGAM]
+                                 WaveformPointsGAM, WaveformPointsGAM, WaveformPointsGAM, PIDGAM, FilterGAM, SimulinkGAM, SimulinkGAM, HistogramGAM, StatisticsGAM]
     
     test_obj.unloadAll()
 
