@@ -15,7 +15,7 @@ class MARTe2HTTPObjectBrowser(MARTe2ConfigObject):
                 ):
         self.class_name = 'HttpObjectBrowser'
         super().__init__()
-        self.configuration_name = configuration_name
+        self.configuration_name = configuration_name.lstrip('+')
         self.root = root
         self.objects = objects
         self.possible_objects = {'HttpObjectBrowser': self.__class__,
@@ -30,6 +30,28 @@ class MARTe2HTTPObjectBrowser(MARTe2ConfigObject):
         for obj in self.objects:
             obj.write(config_writer)
         config_writer.endSection('+' + getname(self))
+
+    # pylint: disable=line-too-long
+    def toPython(self, app_name, parent_name=None):
+        header = "from martepy.marte2.objects.http.objectbrowser import MARTe2HTTPObjectBrowser\n"
+
+        content = f"# Generate HTTP Object Browser objects for {self.configuration_name}\n"
+
+        content += f"""\n\n_{self.configuration_name} = MARTe2HTTPObjectBrowser('{self.configuration_name}', '{self.root}')"""
+
+        content += f"# Generate HTTP Object Browser objects for {self.configuration_name}\n"
+
+        for obj in self.objects:
+            tmp_content, tmp_header = obj.toPython(app_name, "_" + self.configuration_name)
+            content += tmp_content
+            header += tmp_header
+
+        if parent_name:
+            content += f"""{parent_name}.objects += [_{self.configuration_name}]\n\n"""
+        else:
+            content += f"""{app_name}.externals += [_{self.configuration_name}]\n\n"""
+
+        return content, header
 
     def serialize(self):
         ''' Serialize the object '''

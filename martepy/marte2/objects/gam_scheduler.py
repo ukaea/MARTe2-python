@@ -12,13 +12,24 @@ class MARTe2GAMScheduler(MARTe2ConfigObject):
     def __init__(self,
                     configuration_name: str = '+Scheduler',
                     class_name: str = 'GAMScheduler',
-                    timing_datasource_name: str = None,
-                    maxcycles = 0
+                    timing_datasource_name: str = 'GAMScheduler',
+                    maxcycles: int = 0
                 ):
         super().__init__(configuration_name = configuration_name)
         self.class_name = class_name
         self.timing_datasource_name = timing_datasource_name
         self.maxcycles = maxcycles
+
+    # pylint: disable=line-too-long
+    def toPython(self, app_name):
+        header = "from martepy.marte2.objects.gam_scheduler import MARTe2GAMScheduler\n"
+
+        content = f"""_{self.configuration_name} = MARTe2GAMScheduler('{self.configuration_name}', '{self.class_name}', '{self.timing_datasource_name}',
+                            {self.maxcycles})
+
+{app_name}.internals += [_{self.configuration_name}]\n\n"""
+
+        return content, header
 
     def write(self, config_writer):
         ''' Write our configuration of this class '''

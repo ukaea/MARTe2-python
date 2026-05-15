@@ -8,19 +8,37 @@ class MARTe2StateMachineEvent(MARTe2ConfigObject):
     ''' Pythonic representation of the State Machine Event Object '''
     def __init__(self,
                     configuration_name: str = 'GOTOSTATE1',
-                    nextstate = "",
-                    nextstateerror = "",
-                    timeout = 0,
-                    messages = [],
+                    nextstate: str = "",
+                    nextstateerror: str = "",
+                    timeout: int = 0,
+                    messages: list = [],
                 ):
         super().__init__(
             )
         self.class_name = "StateMachineEvent"
-        self.configuration_name = configuration_name.upper()
+        self.configuration_name = configuration_name.upper().lstrip('+')
         self.nextstate = nextstate.upper()
         self.nextstateerror = nextstateerror.upper()
         self.timeout = timeout
         self.messages = messages
+
+    # pylint: disable=line-too-long
+    def toPython(self, app_name, parent_name):
+        header = "from martepy.marte2.objects.statemachine.event import MARTe2StateMachineEvent\n"
+
+        content = f"""_{self.configuration_name} = MARTe2StateMachineEvent('{self.configuration_name}', '{self.nextstate}', '{self.nextstateerror}', {self.timeout})\n\n"""
+
+        for msg in self.messages:
+            tmp_content, tmp_header = msg.toPython(app_name, "_" + self.configuration_name, "messages")
+            content += tmp_content
+            header += tmp_header
+
+        if parent_name:
+            content += f"""{parent_name}.objects += [_{self.configuration_name}]\n\n"""
+        else:
+            content += f"""{app_name}.internals += [_{self.configuration_name}]\n\n"""
+
+        return content, header
 
     def __eq__(self, other):
         if isinstance(other, self.__class__):

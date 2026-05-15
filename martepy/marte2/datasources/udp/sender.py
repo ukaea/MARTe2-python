@@ -7,14 +7,14 @@ class UDPSender(MARTe2DataSource):
     ''' Pythonic representation of the UDP Sender '''
     def __init__(self,
                     configuration_name: str = 'UDPSender',
-                    input_signals = [],
+                    input_signals: list = [],
                     port: int = 0,
                     cpumask: int = 0xFFFFFFFF,
-                    executionmode = 'IndependentThread',
-                    address = '127.0.0.1',
-                    numberofpretriggers = 0,
-                    numberofposttriggers = 0,
-                    stacksize = 10000000
+                    executionmode: str = 'IndependentThread',
+                    address: str = '127.0.0.1',
+                    numberofpretriggers: int = 0,
+                    numberofposttriggers: int = 0,
+                    stacksize: int = 10000000
                 ):
         super().__init__(
                 configuration_name = configuration_name,
@@ -28,6 +28,17 @@ class UDPSender(MARTe2DataSource):
         self.numberofpretriggers = numberofpretriggers
         self.numberofposttriggers = numberofposttriggers
         self.stacksize = stacksize
+
+    # pylint: disable=line-too-long
+    def toPython(self, app_name):
+        header = "from martepy.marte2.datasources.udp.sender import UDPSender\n"
+
+        content = f"""_{self.configuration_name} = UDPSender('{self.configuration_name}', {self.input_signals}, {self.port},
+                                {self.cpumask}, '{self.executionmode}', '{self.address}', {self.numberofpretriggers}, {self.numberofposttriggers}, {self.stacksize})
+
+{app_name}.additional_datasources += [_{self.configuration_name}]\n\n"""
+
+        return content, header
 
     def writeDatasourceConfig(self, config_writer):
         ''' Write the Datasource configuration '''

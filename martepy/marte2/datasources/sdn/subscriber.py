@@ -6,7 +6,7 @@ class SDNSubscriber(MARTe2DataSource):
     ''' Pythonic representation of the SDN Subscriber '''
     def __init__(self,
                     configuration_name: str = 'SDNSubscriber',
-                    output_signals = [],
+                    output_signals: list = [],
                     execution_mode: str = 'IndependentThread',
                     topic: str = 'name',
                     interface: str = 'name',
@@ -47,6 +47,17 @@ class SDNSubscriber(MARTe2DataSource):
         else:
             config_writer.writeNode('CPUs', hex(self.cpus))
         self.writeOutputSignals(config_writer, section_name='Signals')
+
+    # pylint: disable=line-too-long
+    def toPython(self, app_name):
+        header = "from martepy.marte2.datasources.sdn.subscriber import SDNSubscriber\n"
+
+        content = f"""_{self.configuration_name} = SDNSubscriber('{self.configuration_name}', {self.output_signals}, '{self.execution_mode}',
+                                '{self.topic}', '{self.interface}', {self.internal_timeout}, {self.timeout}, {self.cpus}, {self.ignore_timeout_error})
+
+{app_name}.additional_datasources += [_{self.configuration_name}]\n\n"""
+
+        return content, header
 
     def serialize(self):
         ''' Serialize the configuration '''

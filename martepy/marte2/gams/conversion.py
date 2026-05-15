@@ -17,6 +17,16 @@ class ConversionGAM(MARTe2GAM):
                 output_signals = output_signals,
             )
 
+    # pylint: disable=line-too-long
+    def toPython(self, app_name):
+        header = "from martepy.marte2.gams.conversion import ConversionGAM\n"
+
+        content = f"""_{self.configuration_name} = ConversionGAM('{self.configuration_name}', {self.input_signals}, {self.output_signals})
+
+{app_name}.functions += [_{self.configuration_name}]\n\n"""
+
+        return content, header
+
     def writeGamConfig(self, _):
         ''' Nothing to write for this GAM '''
 

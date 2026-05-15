@@ -12,15 +12,27 @@ class TCPMessageProxy(MARTe2Interface):
     ''' Pythonic representation of the TCP Message Proxy provided by padova '''
     def __init__(self,
                     configuration_name: str = 'TCPMessageProxy',
-                    input_signals = [],
-                    output_signals = [],
-                    port = 8400
+                    input_signals: list = [],
+                    output_signals: list = [],
+                    port: int = 8400
                 ):
         super().__init__(
                 configuration_name = configuration_name,
                 class_name = 'TCPSocketMessageProxyExample',
             )
         self.port = port
+
+    # pylint: disable=line-too-long
+    def toPython(self, app_name):
+        header = "from martepy.marte2.interfaces.tcpmessageproxy import TCPMessageProxy\n"
+
+        content = f"""_{self.configuration_name} = TCPMessageProxy('{self.configuration_name}', {self.input_signals}, {self.output_signals},
+                                    {self.port})
+
+                          
+{app_name}.internals += [_{self.configuration_name}]\n\n"""
+
+        return content, header
 
     def writeInterfaceConfig(self, config_writer):
         ''' Write out our port configuration '''

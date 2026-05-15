@@ -7,13 +7,28 @@ class MARTe2StateMachine(MARTe2ConfigObject):
     ''' Pythonic representation of the state machine object '''
     def __init__(self,
                     configuration_name: str = 'GOTOSTATE1',
-                    states = [],
+                    states: list = [],
                 ):
         super().__init__(
             )
         self.class_name = "StateMachine"
-        self.configuration_name = configuration_name
+        self.configuration_name = configuration_name.lstrip('+')
         self.states = states
+
+    # pylint: disable=line-too-long
+    def toPython(self, app_name):
+        header = "from martepy.marte2.objects.statemachine.machine import MARTe2StateMachine\n"
+
+        content = f"""_{self.configuration_name} = MARTe2StateMachine('{self.configuration_name}')\n\n"""
+
+        for state in self.states:
+            tmp_content, tmp_header = state.toPython(app_name, "_" + self.configuration_name, 'states')
+            content += tmp_content
+            header += tmp_header
+
+        content += f"""{app_name}.externals += [_{self.configuration_name}]\n\n"""
+
+        return content, header
 
     def addstate(self,state: list):
         ''' Safe method to add states to the machine '''

@@ -9,12 +9,12 @@ class SSMGAM(MARTe2GAM):
     ''' Pythonic representation of the SSM GAM'''
     def __init__(self,
                     configuration_name: str = 'SSMGAM',
-                    state_matrix = '{}',
-                    input_matrix = '{}',
-                    output_matrix = '{}',
-                    feedthroughmatrix = '{}',
-                    samplefreq = 1,
-                    reset_each_state = 1,
+                    state_matrix: str = '{}',
+                    input_matrix: str = '{}',
+                    output_matrix: str = '{}',
+                    feedthroughmatrix: str = '{}',
+                    samplefreq: int = 1,
+                    reset_each_state: int = 1,
                     input_signals: list = [],
                     output_signals: list = [],
                 ):
@@ -30,6 +30,17 @@ class SSMGAM(MARTe2GAM):
                 input_signals = input_signals,
                 output_signals = output_signals,
             )
+
+    # pylint: disable=line-too-long
+    def toPython(self, app_name):
+        header = "from martepy.marte2.gams.ssm_gam import SSMGAM\n"
+
+        content = f"""_{self.configuration_name} = SSMGAM('{self.configuration_name}', '{self.statematrix}', '{self.inputmatrix}', '{self.outputmatrix}',
+                                    '{self.feedthroughmatrix}', {self.samplefrequency}, {self.resetineachstate},{self.input_signals}, {self.output_signals})
+
+{app_name}.functions += [_{self.configuration_name}]\n\n"""
+
+        return content, header
 
     def writeGamConfig(self, config_writer):
         ''' Write our GAM Configuration '''

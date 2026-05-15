@@ -7,9 +7,9 @@ class EPICSSubscriber(MARTe2DataSource):
     ''' Pythonic representation of the EPICS Subscriber class '''
     def __init__(self,
                     configuration_name: str = 'EPICSSubscriber',
-                    output_signals = [],
-                    StackSize = 1048576,
-                    CPUs = 0xff,
+                    output_signals: list = [],
+                    StackSize: int = 1048576,
+                    CPUs: int = 0xff,
                 ):
         super().__init__(
                 configuration_name = configuration_name,
@@ -30,6 +30,16 @@ class EPICSSubscriber(MARTe2DataSource):
         else:
             config_writer.writeNode('CPUs', hex(self.cpus))
         self.writeOutputSignals(config_writer, section_name='Signals')
+
+    # pylint: disable=line-too-long
+    def toPython(self, app_name):
+        header = "from martepy.marte2.datasources.epics.subscriber import EPICSSubscriber\n"
+
+        content = f"""_{self.configuration_name} = EPICSSubscriber('{self.configuration_name}', {self.output_signals}, {self.stacksize},
+                                {self.cpus})
+
+{app_name}.additional_datasources += [_{self.configuration_name}]\n\n"""
+        return content, header
 
     def serialize(self):
         ''' Serialize the EPICS Subscriber'''

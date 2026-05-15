@@ -55,7 +55,7 @@ class MessageGAM(MARTe2GAM):
                     input_signals: list = [],
                     output_signals: list = [],
                     triggeron: int = 1,
-                    events = None,
+                    events: MARTe2ReferenceContainer = MARTe2ReferenceContainer('+Events'),
                 ):
         self.triggeron = triggeron
         self.mfactory = MFactory()
@@ -70,6 +70,24 @@ class MessageGAM(MARTe2GAM):
                 input_signals = input_signals,
                 output_signals = output_signals,
             )
+
+    # pylint: disable=line-too-long
+    def toPython(self, app_name):
+        header = "from martepy.marte2.gams.message_gam import MessageGAM\n"
+
+        content = f"# {self.configuration_name} Events RefContainer \n"
+
+        content += f"""_{self.configuration_name} = MessageGAM('{self.configuration_name}', {self.input_signals}, {self.output_signals},
+                            {self.triggeron})\n"""
+
+        if self.events:
+            tmp_content, tmp_header = self.events.toPython(app_name, "_" + self.configuration_name, 'events')
+            content += tmp_content
+            header += tmp_header
+
+        content += f"""{app_name}.functions += [_{self.configuration_name}]\n\n"""
+
+        return content, header
 
     def writeGamConfig(self, config_writer):
         ''' Basic GAM Configuration Write up '''

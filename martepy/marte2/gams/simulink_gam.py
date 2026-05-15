@@ -44,6 +44,27 @@ class SimulinkGAM(MARTe2GAM):
                 output_signals = output_signals,
             )
 
+    # pylint: disable=line-too-long
+    def toPython(self, app_name):
+        header = "from martepy.marte2.gams.simulink_gam import SimulinkGAM\n"
+
+        content = f"""# Generate Parameters for SimulinkWrapperGAM {self.configuration_name}
+
+{self.configuration_name}_params = []\n"""
+
+        for param in self.parameters:
+            content += f"{self.configuration_name}_params += [{{'parameter_name': '{param['parameter_name']}', 'type': '{param['type']}', 'presets': '{param['presets']}'}}]\n"
+
+        content += f"""\n\n_{self.configuration_name} = SimulinkGAM('{self.configuration_name}', {self.input_signals}, {self.output_signals},
+                                    '{self.library}', '{self.symbolprefix}', {self.verbosity}, {self.skipinvalidtunableparams}, {self.enforcemodelsignalcoverage},
+                                    '{self.tunableparamexternalsource}', '{self.nonvirtualbusmode}')
+
+_{self.configuration_name}.parameters = {self.configuration_name}_params
+                       
+{app_name}.functions += [_{self.configuration_name}]\n\n"""
+
+        return content, header
+
     def writeGamConfig(self, config_writer):
         ''' Write the GAM configuration - i.e. the expression '''
         config_writer.writeNode('Library', f'"{self.library}"')

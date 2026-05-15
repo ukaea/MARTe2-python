@@ -16,12 +16,12 @@ class Synchronisation(MARTe2DataSource):
     ''' Pythonic representation of the AsyncBridge '''
     def __init__(self,
                     configuration_name: str = 'RealTimeThreadSynchronisation',
-                    waitfornext = 1,
-                    printoverwrite = 'Default',
-                    timeout = -1,
-                    input_signals = [],
-                    output_signals = [],
-                    inputs = False
+                    waitfornext: int = 1,
+                    printoverwrite: str = 'Default',
+                    timeout: int = -1,
+                    input_signals: list = [],
+                    output_signals: list = [],
+                    inputs: bool = False
                 ):
         super().__init__(
                  configuration_name = configuration_name,
@@ -35,6 +35,17 @@ class Synchronisation(MARTe2DataSource):
         self.printoverwrite = printoverwrite
         self.timeout = timeout
         self.input = inputs
+
+    # pylint: disable=line-too-long
+    def toPython(self, app_name):
+        header = "from martepy.marte2.datasources.rt_syncbridge import Synchronisation\n"
+
+        content = f"""_{self.configuration_name} = Synchronisation('{self.configuration_name}', {self.waitfornext}, '{self.printoverwrite}',
+                                {self.timeout}, {self.input_signals}, {self.output_signals}, {self.input})
+
+{app_name}.additional_datasources += [_{self.configuration_name}]\n\n"""
+
+        return content, header
 
     def writeDatasourceConfig(self, config_writer):
         ''' Write the datasource configuration to the cfg. '''

@@ -6,12 +6,12 @@ class SDNPublisher(MARTe2DataSource):
     ''' Pythonic representation of the SDN Publisher '''
     def __init__(self,
                     configuration_name: str = 'SDNPublisher',
-                    input_signals = [],
+                    input_signals: list = [],
                     topic: str = 'name',
                     interface: str = 'name',
                     address: str = '',
                     network_byte_order: int = 1,
-                    source_port = '',
+                    source_port: str = '',
                 ):
         super().__init__(
                 configuration_name = configuration_name,
@@ -34,6 +34,17 @@ class SDNPublisher(MARTe2DataSource):
         if self.port != '':
             config_writer.writeNode('SourcePort', f'{self.port}')
         self.writeInputSignals(config_writer, section_name='Signals')
+
+    # pylint: disable=line-too-long
+    def toPython(self, app_name):
+        header = "from martepy.marte2.datasources.sdn.publisher import SDNPublisher\n"
+
+        content = f"""_{self.configuration_name} = SDNPublisher('{self.configuration_name}', {self.input_signals}, '{self.topic}',
+                                '{self.interface}', '{self.address}', {self.byte_order}, '{self.port}')
+
+{app_name}.additional_datasources += [_{self.configuration_name}]\n\n"""
+
+        return content, header
 
     def serialize(self):
         ''' Serialize the object '''

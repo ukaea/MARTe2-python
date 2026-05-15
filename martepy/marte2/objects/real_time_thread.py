@@ -24,7 +24,7 @@ class MARTe2RealTimeThread(MARTe2ConfigObject):
                     functions: list = [],
                 ):
         super().__init__()
-        self.configuration_name = configuration_name
+        self.configuration_name = configuration_name.lstrip('+')
         self.class_name = 'RealTimeThread'
         self.cpu_mask = cpu_mask
         self.functions = functions
@@ -51,6 +51,23 @@ class MARTe2RealTimeThread(MARTe2ConfigObject):
         [function_names.append(getname(i)) for i in self.functions] # pylint: disable=W0106
         config_writer.writeMARTe2Vector('Functions', function_names, formatAsFloat = False)
         config_writer.endSection('+' + getname(self))
+
+    # pylint: disable=line-too-long
+    def toPython(self, app_name, parent_name):
+        header = "from martepy.marte2.objects.real_time_thread import MARTe2RealTimeThread\n"
+
+        content = f"""_{self.configuration_name} = MARTe2RealTimeThread('{self.configuration_name}', {self.cpu_mask})\n\n"""
+
+        for function in self.functions:
+            # assume the function already exists
+            content += f"_{self.configuration_name}.functions += [_{function.configuration_name}]\n"
+
+        if parent_name:
+            content += f"""\n{parent_name}.objects += [_{self.configuration_name}]\n\n"""
+        else:
+            content += f"""\n{app_name}.states += [_{self.configuration_name}]\n\n"""
+
+        return content, header
 
     def serialize(self):
         ''' Serialize our object '''

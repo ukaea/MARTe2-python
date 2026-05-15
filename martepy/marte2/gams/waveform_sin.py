@@ -9,12 +9,12 @@ class WaveformSinGAM(MARTe2GAM):
                     configuration_name: str = 'WaveSine',
                     input_signals: list = [],
                     output_signals: list = [],
-                    amplitude = 1.0,
-                    frequency = 1.0,
-                    phase = 0.0,
-                    offset = 0.0,
-                    starttriggertime = [],
-                    stoptriggertime = []
+                    amplitude: float = 1.0,
+                    frequency: float = 1.0,
+                    phase: float = 0.0,
+                    offset: float = 0.0,
+                    starttriggertime: list = [],
+                    stoptriggertime: list = []
                 ):
         super().__init__(
                 configuration_name = configuration_name,
@@ -28,6 +28,17 @@ class WaveformSinGAM(MARTe2GAM):
         self.offset = offset
         self.starttriggertime = starttriggertime
         self.stoptriggertime = stoptriggertime
+
+    # pylint: disable=line-too-long
+    def toPython(self, app_name):
+        header = "from martepy.marte2.gams.waveform_sin import WaveformSinGAM\n"
+
+        content = f"""_{self.configuration_name} = WaveformSinGAM('{self.configuration_name}', {self.input_signals}, {self.output_signals}, {self.amplitude},
+                                    {self.frequency}, {self.phase}, {self.offset}, {self.starttriggertime}, {self.stoptriggertime})
+
+{app_name}.functions += [_{self.configuration_name}]\n\n"""
+
+        return content, header
 
     def writeGamConfig(self, config_writer):
         ''' Write our GAM Configuration '''

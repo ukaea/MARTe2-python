@@ -8,12 +8,32 @@ class MARTe2HttpMessageInterface(MARTe2ConfigObject):
     ''' Pythonic representation of the HTTP message interface '''
     def __init__(self,
                     configuration_name: str = 'WebRoot',
-                    objects = [],
+                    objects: list = [],
                 ):
         self.class_name = 'HttpMessageInterface'
         super().__init__()
-        self.configuration_name = configuration_name
+        self.configuration_name = configuration_name.lstrip('+')
         self.objects = objects
+
+    # pylint: disable=line-too-long
+    def toPython(self, app_name, parent_name=None):
+        header = "from martepy.marte2.objects.http.messageinterface import MARTe2HttpMessageInterface\n"
+
+        content = f"""\n\n_{self.configuration_name} = MARTe2HttpMessageInterface('{self.configuration_name}')"""
+
+        content += f"# Generate HTTP Message Interface objects for {self.configuration_name}\n"
+
+        for obj in self.objects:
+            tmp_content, tmp_header = obj.toPython(app_name, "_" + self.configuration_name)
+            content += tmp_content
+            header += tmp_header
+
+        if parent_name:
+            content += f"""{parent_name}.objects += [_{self.configuration_name}]\n\n"""
+        else:
+            content += f"""{app_name}.externals += [_{self.configuration_name}]\n\n"""
+
+        return content, header
 
     def write(self, config_writer):
         ''' Write the configuration of our object '''

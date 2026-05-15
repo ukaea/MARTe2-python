@@ -11,9 +11,9 @@ class StatisticsGAM(MARTe2GAM):
                     configuration_name: str = 'Statistics',
                     input_signals: list = [],
                     output_signals: list = [],
-                    windowsize = 0,
-                    startcyclenumber = 0,
-                    infinitemaxmin = 0
+                    windowsize: int = 0,
+                    startcyclenumber: int = 0,
+                    infinitemaxmin: int = 0
                 ):
         super().__init__(
                 configuration_name = configuration_name,
@@ -24,6 +24,17 @@ class StatisticsGAM(MARTe2GAM):
         self.windowsize = windowsize
         self.startcyclenumber = startcyclenumber
         self.infinitemaxmin = infinitemaxmin
+
+    # pylint: disable=line-too-long
+    def toPython(self, app_name):
+        header = "from martepy.marte2.gams.statistics import StatisticsGAM\n"
+
+        content = f"""_{self.configuration_name} = StatisticsGAM('{self.configuration_name}', {self.input_signals}, {self.output_signals}, {self.windowsize},
+                                    {self.startcyclenumber}, {self.infinitemaxmin})
+
+{app_name}.functions += [_{self.configuration_name}]\n\n"""
+
+        return content, header
 
     def writeGamConfig(self, config_writer):
         ''' Write our GAM Configuration '''

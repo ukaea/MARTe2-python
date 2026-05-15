@@ -26,7 +26,7 @@ class MARTe2Exception(Exception):
 class MARTe2Application():
     ''' The pythonic object representation of a MARTe2 application, how to build it and
     ultimately write this into it's string configuration format. '''
-    def __init__(self, app_name = '$App'):
+    def __init__(self, app_name = 'App'):
         self.resetApp()
         self.externals = self.NonDuplicatingList()
         self.inputs = []
@@ -47,7 +47,7 @@ class MARTe2Application():
                        'timefrequency': 1000}
         self.type_db = TypeDB()
         self.maxcycles = 40000
-        self.app_name = 'App'
+        self.app_name = app_name
         # Load the factory
         self.factory = Factory()
         self.marte2_dir = os.path.abspath(os.path.join(os.path.dirname(__file__)))
@@ -653,6 +653,87 @@ signal/alias: {string} in datasource {datasource_name}"""))
         out.endSection(f'${self.app_name.replace("$","")}')
 
         return str(out) + "\n"
+
+    def _removeDuplicateLines(self, text: str) -> str:
+        ''' Remove duplicates in a string multi-line '''
+        seen = set()
+        result = []
+
+        for line in text.splitlines():
+            if line not in seen:
+                seen.add(line)
+                result.append(line)
+
+        return "\n".join(result)
+
+    def toPython(self):
+        ''' Generate python code for the application to get generated '''
+        str_header = 'from martepy.marte2.generic_application import MARTe2Application\n'
+
+        str_f_content = ""
+        for i in self.functions:
+            str_content_tmp, str_header_tmp = i.toPython(self.app_name)
+            str_f_content = str_f_content + str_content_tmp
+            str_header = str_header + str_header_tmp
+
+        str_d_content = ""
+        for i in self.additional_datasources:
+            str_content_tmp, str_header_tmp = i.toPython(self.app_name)
+            str_d_content = str_d_content + str_content_tmp
+            str_header = str_header + str_header_tmp
+
+        str_s_content = ""
+        for i in self.states:
+            str_content_tmp, str_header_tmp = i.toPython(self.app_name)
+            str_s_content = str_s_content + str_content_tmp
+            str_header = str_header + str_header_tmp
+
+        str_i_content = ""
+        for i in self.internals:
+            str_content_tmp, str_header_tmp = i.toPython(self.app_name)
+            str_i_content = str_i_content + str_content_tmp
+            str_header = str_header + str_header_tmp
+
+        str_e_content = ""
+        for e in self.externals:
+            str_content_tmp, str_header_tmp = e.toPython(self.app_name)
+            str_e_content = str_e_content + str_content_tmp
+            str_header = str_header + str_header_tmp
+
+        str_o_content = ""
+        for o in self.objects:
+            str_content_tmp, str_header_tmp = o.toPython(self.app_name)
+            str_o_content = str_o_content + str_content_tmp
+            str_header = str_header + str_header_tmp
+
+        str_content = f"""\n\n\n{self.app_name} = MARTe2Application("{self.app_name}")
+
+
+# Generate Functions
+# 
+{str_f_content}
+# Generate DataSources
+# 
+{str_d_content}
+# Generate States
+# 
+{str_s_content}
+# Generate Internals
+# 
+{str_i_content}
+# Generate Externals
+# 
+{str_e_content}
+# Generate objects
+# 
+{str_o_content}
+
+def getApplication():
+    return {self.app_name}
+"""
+        str_header = self._removeDuplicateLines(str_header)
+
+        return str_header + str_content
 
     def sanitize(self):
         ''' Resanitize an application between its state, 

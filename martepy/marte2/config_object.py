@@ -12,7 +12,7 @@ class MARTe2ConfigObject(Serializable):
     def __init__(self, configuration_name=''):
         super().__init__()
         self._config_writer = None
-        self.configuration_name = configuration_name
+        self.configuration_name = configuration_name.lstrip('+')
 
     def __call__(self, config_writer=None):
         if not config_writer:
@@ -43,6 +43,10 @@ class MARTe2ConfigObject(Serializable):
             self._config_writer.setTab(tab)
         else:
             raise TypeError('This MARTe1ConfigObject has no _config_writer')
+
+    def toPython(self, _):
+        ''' Generate a python string that will generate it the object again '''
+        return "", ""
 
     @staticmethod
     def writeSignals(defs, config_writer):

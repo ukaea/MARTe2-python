@@ -16,9 +16,26 @@ class MARTe2RealTimeState(MARTe2ConfigObject):
                     threads: MARTe2ReferenceContainer = genericThread(),
                 ):
         super().__init__()
-        self.configuration_name = configuration_name
+        self.configuration_name = configuration_name.lstrip('+')
         self.class_name = 'RealTimeState'
         self.threads = threads
+
+    # pylint: disable=line-too-long
+    def toPython(self, app_name, parent_name=None):
+        header = "from martepy.marte2.objects.real_time_state import MARTe2RealTimeState\n"
+
+        content = f"""_{self.configuration_name} = MARTe2RealTimeState('{self.configuration_name}')\n\n"""
+
+        tmp_content, tmp_header = self.threads.toPython(app_name, "_" + self.configuration_name, 'threads')
+        content += tmp_content
+        header += tmp_header
+
+        if parent_name:
+            content += f"""{parent_name}.objects += [_{self.configuration_name}]\n\n"""
+        else:
+            content += f"""{app_name}.states += [_{self.configuration_name}]\n\n"""
+
+        return content, header
 
     def write(self, config_writer):
         ''' Write our configuration of this class '''

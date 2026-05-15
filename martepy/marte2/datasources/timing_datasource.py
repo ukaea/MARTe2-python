@@ -6,13 +6,23 @@ class TimingDataSource(MARTe2DataSource):
     ''' Pythonic representation of the Timing DataSource '''
     def __init__(self,
                     configuration_name: str = 'Timings',
-                    input_signals = [],
-                    output_signals = []
+                    input_signals: list = [],
+                    output_signals: list = []
                 ):
         super().__init__(
                 configuration_name = configuration_name,
                 class_name = 'TimingDataSource'
             )
+
+    # pylint: disable=line-too-long
+    def toPython(self, app_name):
+        header = "from martepy.marte2.datasources.timing_datasource import TimingDataSource\n"
+
+        content = f"""_{self.configuration_name} = TimingDataSource('{self.configuration_name}', {self.input_signals}, {self.output_signals})
+
+{app_name}.additional_datasources += [_{self.configuration_name}]\n\n"""
+
+        return content, header
 
     def writeDatasourceConfig(self, config_writer):
         ''' Write nothing '''

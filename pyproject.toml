@@ -4,7 +4,7 @@ build-backend = "setuptools.build_meta"
 
 [project]
 name = "martepy"
-version = "1.0.9"
+version = "1.1.0"
 description = """This repository provides python classes which represent MARTe2 GAMs, DataSources and applications. Alongside this it provides useful frameworks for debugging and developing applications with MARTe2."""
 readme = "README.md"
 authors = [
@@ -49,6 +49,8 @@ disable = [
     "E0611",
     "R0903",
     "I1101"
+    "I1101",
+    "W0221"
 ]
 max-line-length = 100
 ignore = ["tests", "docs", "examples", "build"]

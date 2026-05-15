@@ -10,7 +10,7 @@ class ConstantGAM(MARTe2GAM):
     def __init__(self,
                     configuration_name: str = 'Constants',
                     output_signals: list = [],
-                    input_signals = []
+                    input_signals: list = []
                 ):
         #assert all(('Default' in d['MARTeConfig'] for n, d in output_signals))
         super().__init__(
@@ -19,6 +19,16 @@ class ConstantGAM(MARTe2GAM):
                 output_signals = output_signals,
                 input_signals = []
             )
+
+    # pylint: disable=line-too-long
+    def toPython(self, app_name):
+        header = "from martepy.marte2.gams.constant_gam import ConstantGAM\n"
+
+        content = f"""_{self.configuration_name} = ConstantGAM('{self.configuration_name}', {self.input_signals}, {self.output_signals})
+        
+{app_name}.functions += [_{self.configuration_name}]\n\n"""
+
+        return content, header
 
     def writeGamConfig(self, _):
         ''' Write an empty configuration '''

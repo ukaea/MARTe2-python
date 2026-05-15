@@ -6,13 +6,36 @@ class MARTe2ReferenceContainer(MARTe2ConfigObject):
     ''' Pythonic representation of ReferenceContainer '''
     def __init__(self,
                     configuration_name: str = 'Message',
-                    objects = [],
+                    objects: list = [],
                 ):
         super().__init__(
             )
         self.class_name = "ReferenceContainer"
         self.objects = objects
-        self.configuration_name = configuration_name
+        self.configuration_name = configuration_name.lstrip('+')
+
+    # pylint: disable=line-too-long
+    def toPython(self, app_name, parent_name, type_name=None):
+        header = "from martepy.marte2.gams.message_gam import MARTe2ReferenceContainer\n"
+
+        content = ''
+
+        content += f"""_{self.configuration_name} = MARTe2ReferenceContainer('{self.configuration_name}')\n\n"""
+
+        for obj in self.objects:
+            tmp_content, tmp_header = obj.toPython(app_name, "_" + self.configuration_name)
+            content += tmp_content
+            header += tmp_header
+
+        if parent_name:
+            if type_name:
+                content += f"""{parent_name}.{type_name} = _{self.configuration_name}\n\n"""
+            else:
+                content += f"""{parent_name}.objects += [_{self.configuration_name}]\n\n"""
+        else:
+            content += f"""{app_name}.internals += [_{self.configuration_name}]\n\n"""
+
+        return content, header
 
     def write(self, config_writer):
         ''' Write our configuration of this class '''

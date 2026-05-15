@@ -8,8 +8,8 @@ class FileWriter(MARTe2DataSource):
     ''' Pythonic representation of the File Writer object '''
     def __init__(self,
                     configuration_name: str = 'FileWriter',
-                    input_signals = [],
-                    output_signals = [],
+                    input_signals: list = [],
+                    output_signals: list = [],
                     number_of_buffers: int = 100000,
                     cpu_mask: int = 0xFFFFFFFF,
                     stack_size: int = 100000000,
@@ -18,9 +18,9 @@ class FileWriter(MARTe2DataSource):
                     file_format: str = 'csv',
                     csv_separator: str = ',',
                     store_on_trigger: bool = False,
-                    refreshcontent = 0,
-                    numpretriggers = 0,
-                    numposttriggers = 0
+                    refreshcontent: int = 0,
+                    numpretriggers: int = 0,
+                    numposttriggers: int = 0
                 ):
         if output_signals:
             raise TypeError('''FileWriter does not accept any
@@ -41,6 +41,18 @@ class FileWriter(MARTe2DataSource):
         self.refreshcontent = refreshcontent
         self.numberofpretriggers = numpretriggers
         self.numberofposttriggers = numposttriggers
+
+    # pylint: disable=line-too-long
+    def toPython(self, app_name):
+        header = "from martepy.marte2.datasources.files.writer import FileWriter\n"
+
+        content = f"""_{self.configuration_name} = FileWriter('{self.configuration_name}', {self.input_signals}, {self.output_signals},
+                                {self.numberofbuffers}, {self.cpumask}, {self.stacksize}, '{self.filename}', '{self.overwrite}',
+                                '{self.fileformat}', '{self.csvseparator}', {self.storeontrigger}, {self.refreshcontent}, {self.numberofpretriggers}, {self.numberofposttriggers})
+
+{app_name}.additional_datasources += [_{self.configuration_name}]\n\n"""
+
+        return content, header
 
     def writeDatasourceConfig(self, config_writer):
         ''' Write our datasource configuration '''

@@ -8,12 +8,12 @@ class EPICSPublisher(MARTe2DataSource):
 
     def __init__(self,
                     configuration_name: str = 'EPICSPublisher',
-                    input_signals = [],
-                    StackSize = 1048576,
-                    CPUs = 0xff,
-                    NumberOfBuffers=10,
-                    IgnoreBufferOverrun=1,
-                    DBR64CastDouble="yes",
+                    input_signals: list = [],
+                    StackSize: int = 1048576,
+                    CPUs: int = 0xff,
+                    NumberOfBuffers: int =10,
+                    IgnoreBufferOverrun: int =1,
+                    DBR64CastDouble: str ="yes",
                 ):
         super().__init__(
                 configuration_name = configuration_name,
@@ -40,6 +40,16 @@ class EPICSPublisher(MARTe2DataSource):
         config_writer.writeNode('IgnoreBufferOverrun', f'{self.ignorebufferoverrun}')
         config_writer.writeNode('DBR64CastDouble', f'{self.dbr64castdouble}')
         self.writeInputSignals(config_writer, section_name='Signals')
+
+    # pylint: disable=line-too-long
+    def toPython(self, app_name):
+        header = "from martepy.marte2.datasources.epics.publisher import EPICSPublisher\n"
+
+        content = f"""_{self.configuration_name} = EPICSPublisher('{self.configuration_name}', {self.input_signals}, {self.stacksize},
+                                {self.cpus}, {self.numberofbuffers}, {self.ignorebufferoverrun}, '{self.dbr64castdouble}')
+
+{app_name}.additional_datasources += [_{self.configuration_name}]\n\n"""
+        return content, header
 
     def serialize(self):
         ''' Serialise the EPICS Publisher configuration '''

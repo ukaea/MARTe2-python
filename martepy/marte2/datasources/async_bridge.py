@@ -16,13 +16,13 @@ class AsyncBridge(MARTe2DataSource):
     ''' Pythonic representation of the AsyncBridge '''
     def __init__(self,
                     configuration_name: str = 'RealTimeThreadAsyncBridge',
-                    numbuffers = 1,
-                    heapname = 'Default',
-                    blocking_mode = 0,
-                    resetmsec_timeout = -1,
-                    input_signals = [],
-                    output_signals = [],
-                    inputs = False
+                    numbuffers: int = 1,
+                    heapname: str = 'Default',
+                    blocking_mode: int = 0,
+                    resetmsec_timeout: int = -1,
+                    input_signals: list = [],
+                    output_signals: list = [],
+                    inputs: bool = False
                 ):
         super().__init__(
                  configuration_name = configuration_name,
@@ -37,6 +37,17 @@ class AsyncBridge(MARTe2DataSource):
         self.blocking_mode = blocking_mode
         self.resetmsec_timeout = resetmsec_timeout
         self.input = inputs
+
+    # pylint: disable=line-too-long
+    def toPython(self, app_name):
+        header = "from martepy.marte2.datasources.async_bridge import AsyncBridge\n"
+
+        content = f"""_{self.configuration_name} = AsyncBridge('{self.configuration_name}', {self.numbuffers}, '{self.heapname}',
+                                {self.blocking_mode}, {self.resetmsec_timeout}, {self.input_signals}, {self.output_signals}, {self.input})
+
+{app_name}.additional_datasources += [_{self.configuration_name}]\n\n"""
+
+        return content, header
 
     def writeDatasourceConfig(self, config_writer):
         ''' Write the datasource configuration to the cfg. '''

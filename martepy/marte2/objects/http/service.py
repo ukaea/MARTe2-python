@@ -7,17 +7,17 @@ class MARTe2HttpService(MARTe2ConfigObject):
     ''' Pythonic representation of the HTTP Service object '''
     def __init__(self,
                     configuration_name: str = 'WebRoot',
-                    port = 8084,
-                    webroot = "WebRoot",
-                    timeout = 0,
-                    listenmaxconnections = 255,
-                    accepttimeout = 1000,
-                    maxnumberofthreads = 8,
-                    minnumberofthreads = 1,
+                    port: int = 8084,
+                    webroot: str = "WebRoot",
+                    timeout: int = 0,
+                    listenmaxconnections: int = 255,
+                    accepttimeout: int = 1000,
+                    maxnumberofthreads: int = 8,
+                    minnumberofthreads: int = 1,
                 ):
         self.class_name = 'HttpService'
         super().__init__()
-        self.configuration_name = configuration_name
+        self.configuration_name = configuration_name.lstrip('+')
         self.port = port
         self.webroot = webroot
         self.timeout = timeout
@@ -25,6 +25,18 @@ class MARTe2HttpService(MARTe2ConfigObject):
         self.accepttimeout = accepttimeout
         self.maxnumberofthreads = maxnumberofthreads
         self.minnumberofthreads = minnumberofthreads
+
+    # pylint: disable=line-too-long
+    def toPython(self, app_name):
+        header = "from martepy.marte2.objects.http.service import MARTe2HttpService\n"
+
+        content = f"""_{self.configuration_name} = MARTe2HttpService('{self.configuration_name}', {self.port}, '{self.webroot}',
+                                    {self.timeout}, {self.listenmaxconnections}, {self.accepttimeout}, {self.maxnumberofthreads}, {self.minnumberofthreads})
+
+                                    
+{app_name}.externals += [_{self.configuration_name}]\n\n"""
+
+        return content, header
 
     def write(self, config_writer):
         ''' Write the configuration of our object '''

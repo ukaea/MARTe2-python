@@ -7,10 +7,10 @@ class UDPReceiver(MARTe2DataSource):
     ''' Pythonic representation of the UDP Receiver '''
     def __init__(self,
                     configuration_name: str = 'UDPReceiver',
-                    output_signals = [],
+                    output_signals: list = [],
                     address: str = '',
                     interfaceaddress: str = '',
-                    stacksize = 10000000,
+                    stacksize: int = 10000000,
                     executionmode: str = 'IndependentThread',
                     timeout: int = 0,
                     port: int = 40442,
@@ -28,6 +28,17 @@ class UDPReceiver(MARTe2DataSource):
         self.address = address
         self.interfaceaddress = interfaceaddress
         self.stacksize = stacksize
+
+    # pylint: disable=line-too-long
+    def toPython(self, app_name):
+        header = "from martepy.marte2.datasources.udp.receiver import UDPReceiver\n"
+
+        content = f"""_{self.configuration_name} = UDPReceiver('{self.configuration_name}', {self.output_signals}, '{self.address}',
+                                '{self.interfaceaddress}', {self.stacksize}, '{self.executionmode}', {self.timeout}, {self.port}, {self.cpu_mask})
+
+{app_name}.additional_datasources += [_{self.configuration_name}]\n\n"""
+
+        return content, header
 
     def writeDatasourceConfig(self, config_writer):
         ''' Write the datasource configuration '''

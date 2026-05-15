@@ -12,8 +12,8 @@ class HistogramGAM(MARTe2GAM):
                     configuration_name: str = 'Histogram',
                     input_signals: list = [],
                     output_signals: list = [],
-                    begincyclenumber = 0,
-                    statechangeresetname = "All"
+                    begincyclenumber: int = 0,
+                    statechangeresetname: str = "All"
                 ):
         super().__init__(
                 configuration_name = configuration_name,
@@ -23,6 +23,17 @@ class HistogramGAM(MARTe2GAM):
             )
         self.begincyclenumber = begincyclenumber
         self.statechangeresetname = statechangeresetname
+
+    # pylint: disable=line-too-long
+    def toPython(self, app_name):
+        header = "from martepy.marte2.gams.histogram import HistogramGAM\n"
+
+        content = f"""_{self.configuration_name} = HistogramGAM('{self.configuration_name}', {self.input_signals}, {self.output_signals},
+                                    {self.begincyclenumber}, '{self.statechangeresetname}')
+
+{app_name}.functions += [_{self.configuration_name}]\n\n"""
+
+        return content, header
 
     def writeGamConfig(self, config_writer):
         ''' Write our GAM Configuration '''

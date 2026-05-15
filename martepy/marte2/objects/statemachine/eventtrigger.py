@@ -7,15 +7,40 @@ class MARTe2EventConditionTrigger(MARTe2ConfigObject):
     ''' Pythonic representation of the Event Condition Trigger Object '''
     def __init__(self,
                     configuration_name: str = '+NewEvent',
-                    class_name = "EventConditionTrigger",
-                    eventtriggers = {},
-                    msgs = [],
+                    class_name: str = "EventConditionTrigger",
+                    eventtriggers: dict = {},
+                    msgs: list = [],
                 ):
         super().__init__()
         self.class_name = class_name
         self.eventtriggers = eventtriggers
-        self.configuration_name = configuration_name
+        self.configuration_name = configuration_name.lstrip('+')
         self.objects = msgs
+
+    # pylint: disable=line-too-long
+    def toPython(self, app_name, parent_name=None, type_name="objects"):
+        header = "from martepy.marte2.objects.statemachine.eventtrigger import MARTe2EventConditionTrigger\n"
+
+        content = f"""\n\n_{self.configuration_name} = MARTe2EventConditionTrigger('{self.configuration_name}')\n\n"""
+
+        content += f"# Generate Event Triggers Messages for {self.configuration_name}\n"
+
+        for msg in self.objects:
+            tmp_content, tmp_header = msg.toPython(app_name, "_" + self.configuration_name)
+            content += tmp_content
+            header += tmp_header
+
+        content += f"# Generate Event Triggers for {self.configuration_name}\n"
+
+        for key, value in self.eventtriggers.items():
+            content += f"{self.configuration_name}.eventtriggers[{key}] = {value}"
+
+        if parent_name:
+            content += f"""{parent_name}.{type_name} += [_{self.configuration_name}]\n\n"""
+        else:
+            content += f"""{app_name}.internals += [_{self.configuration_name}]\n\n"""
+
+        return content, header
 
     def parseUnknown(self, obj):
         ''' Used to parse unknown objects when unpacking from files '''

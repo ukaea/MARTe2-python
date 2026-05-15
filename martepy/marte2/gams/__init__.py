@@ -29,5 +29,7 @@ __all__ = [
         'PIDGAM',
         'WaveformChirpGAM',
         'WaveformPointsGAM',
-        'WaveformSinGAM'
+        'WaveformSinGAM',
+        'HistogramGAM',
+        'StatisticsGAM'
     ]

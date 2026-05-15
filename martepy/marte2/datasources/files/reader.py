@@ -21,13 +21,13 @@ class FileReader(MARTe2DataSource):
     ''' Pythonic representation of the FileReader '''
     def __init__(self,
                     configuration_name: str = 'FileReader',
-                    output_signals = [],
-                    filename = "",
-                    fileformat = "csv",
-                    separator = ",",
-                    interpolate = "no",
-                    eof = "Rewind",
-                    preload = "yes"
+                    output_signals: list = [],
+                    filename: str = "",
+                    fileformat: str = "csv",
+                    separator: str = ",",
+                    interpolate: str = "no",
+                    eof: str = "Rewind",
+                    preload: str = "yes"
                 ):
         super().__init__(
                 configuration_name = configuration_name,
@@ -50,6 +50,16 @@ class FileReader(MARTe2DataSource):
         config_writer.writeNode('EOF', f'"{self.eof}"')
         config_writer.writeNode('Preload', f'"{self.preload}"')
         self.writeOutputSignals(config_writer, section_name='Signals')
+
+    # pylint: disable=line-too-long
+    def toPython(self, app_name):
+        header = "from martepy.marte2.datasources.files.reader import FileReader\n"
+
+        content = f"""_{self.configuration_name} = FileReader('{self.configuration_name}', {self.output_signals}, '{self.filename}',
+                                '{self.fileformat}', '{self.csvseparator}', '{self.interpolate}', '{self.eof}', '{self.preload}')
+
+{app_name}.additional_datasources += [_{self.configuration_name}]\n\n"""
+        return content, header
 
     def serialize(self):
         ''' Serialize our current configuration '''

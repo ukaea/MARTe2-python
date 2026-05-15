@@ -7,13 +7,38 @@ class MARTe2ConfigurationDatabase(MARTe2ConfigObject):
     ''' Pythonic representation of configuration database '''
     def __init__(self,
                     configuration_name: str = '+Parameters',
-                    class_name = "ConfigurationDatabase",
-                    objects = {},
+                    class_name: str = "ConfigurationDatabase",
+                    objects: dict = {},
                 ):
         super().__init__()
         self.class_name = class_name
         self.objects = objects
-        self.configuration_name = configuration_name
+        self.configuration_name = configuration_name.lstrip('+')
+
+    # pylint: disable=line-too-long
+    def toPython(self, app_name, parent_name, type_name=None, listt=True):
+        header = "from martepy.marte2.objects.configuration_database import MARTe2ConfigurationDatabase\n"
+
+        content = ''
+
+        content += f"""_{self.configuration_name} = MARTe2ConfigurationDatabase('{self.configuration_name}')\n"""
+
+        for key, value in self.objects.items():
+            content += f"_{self.configuration_name}.objects['{key}'] = {value}\n"
+
+        adder = '='
+        if listt:
+            adder = '+='
+
+        if parent_name:
+            if type_name:
+                content += f"""{parent_name}.{type_name} {adder} [_{self.configuration_name}]\n\n"""
+            else:
+                content += f"""{parent_name}.objects {adder} [_{self.configuration_name}]\n\n"""
+        else:
+            content += f"""{app_name}.internals {adder} [_{self.configuration_name}]\n\n"""
+
+        return content, header
 
     def __eq__(self, other):
         if isinstance(other, self.__class__):

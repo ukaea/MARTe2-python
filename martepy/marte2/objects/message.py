@@ -7,21 +7,40 @@ class MARTe2Message(MARTe2ConfigObject):
     ''' Pythonic representation of Message '''
     def __init__(self,
                     configuration_name: str = 'Message',
-                    destination = "App",
-                    function = "StopCurrentStateExecution",
-                    parameters = MARTe2ConfigurationDatabase(),
-                    mode = "ExpectsReply",
-                    maxwait = 0,
+                    destination: str = "App",
+                    function: str = "StopCurrentStateExecution",
+                    parameters: MARTe2ConfigurationDatabase = MARTe2ConfigurationDatabase(),
+                    mode: str = "ExpectsReply",
+                    maxwait: int = 0,
                 ):
         super().__init__(
             )
         self.class_name = "Message"
-        self.configuration_name = configuration_name
+        self.configuration_name = configuration_name.lstrip('+')
         self.destination = destination
         self.function = function
         self.parameters = parameters
         self.mode = mode
         self.maxwait = maxwait
+
+    # pylint: disable=line-too-long
+    def toPython(self, app_name, parent_name=None, type_name="objects"):
+        header = "from martepy.marte2.objects.message import MARTe2Message\n"
+
+        content = f"""\n\n_{self.configuration_name} = MARTe2Message('{self.configuration_name}', '{self.destination}', '{self.function}', '{self.mode}', {self.maxwait})\n\n"""
+
+        content += f"# Generate Message Parameters objects for {self.configuration_name}\n"
+
+        tmp_content, tmp_header = self.parameters.toPython(app_name, "_" + self.configuration_name, 'parameters', False)
+        content += tmp_content
+        header += tmp_header
+
+        if parent_name:
+            content += f"""{parent_name}.{type_name} += [_{self.configuration_name}]\n\n"""
+        else:
+            content += f"""{app_name}.internals += [_{self.configuration_name}]\n\n"""
+
+        return content, header
 
     def __eq__(self, other):
         if isinstance(other, self.__class__):

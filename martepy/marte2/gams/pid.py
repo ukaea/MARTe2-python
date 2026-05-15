@@ -11,12 +11,12 @@ class PIDGAM(MARTe2GAM):
                     configuration_name: str = 'PID',
                     input_signals: list = [],
                     output_signals: list = [],
-                    kp = 0.0,
-                    ki = 0.0,
-                    kd = 0.0,
-                    samplefrequency = 1.0,
-                    maxoutput = 1.0,
-                    minoutput = 0.0
+                    kp: float = 0.0,
+                    ki: float = 0.0,
+                    kd: float = 0.0,
+                    samplefrequency: float = 1.0,
+                    maxoutput: float = 1.0,
+                    minoutput: float = 0.0
                 ):
         super().__init__(
                 configuration_name = configuration_name,
@@ -30,6 +30,17 @@ class PIDGAM(MARTe2GAM):
         self.samplefrequency = samplefrequency
         self.maxoutput = maxoutput
         self.minoutput = minoutput
+
+    # pylint: disable=line-too-long
+    def toPython(self, app_name):
+        header = "from martepy.marte2.gams.pid import PIDGAM\n"
+
+        content = f"""_{self.configuration_name} = PIDGAM('{self.configuration_name}', {self.input_signals}, {self.output_signals},
+                                    {self.kp}, {self.ki}, {self.kd}, {self.samplefrequency}, {self.maxoutput}, {self.minoutput})
+
+{app_name}.functions += [_{self.configuration_name}]\n\n"""
+
+        return content, header
 
     def writeGamConfig(self, config_writer):
         ''' Write our GAM Configuration '''

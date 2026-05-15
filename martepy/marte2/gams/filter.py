@@ -12,9 +12,9 @@ class FilterGAM(MARTe2GAM):
                     configuration_name: str = 'Filter',
                     input_signals: list = [],
                     output_signals: list = [],
-                    num = [],
-                    den = [],
-                    resetineachstate = 0,
+                    num: list = [],
+                    den: list = [],
+                    resetineachstate: int = 0,
                 ):
         super().__init__(
                 configuration_name = configuration_name,
@@ -25,6 +25,17 @@ class FilterGAM(MARTe2GAM):
         self.num = num
         self.den = den
         self.resetineachstate = resetineachstate
+
+    # pylint: disable=line-too-long
+    def toPython(self, app_name):
+        header = "from martepy.marte2.gams.filter import FilterGAM\n"
+
+        content = f"""_{self.configuration_name} = FilterGAM('{self.configuration_name}', {self.input_signals}, {self.output_signals}, {self.num},
+                                    {self.den}, {self.resetineachstate})
+
+{app_name}.functions += [_{self.configuration_name}]\n\n"""
+
+        return content, header
 
     def writeGamConfig(self, config_writer):
         ''' Write the Filter GAM Configuration '''

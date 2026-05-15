@@ -19,9 +19,9 @@ class LinuxTimer(MARTe2DataSource):
                     cpu_mask: int = 0xFFFFFFFF,
                     sleep_percentage: int = 0,
                     phase: int = 0,
-                    frequency = 1000,
-                    input_signals = [],
-                    output_signals = []
+                    frequency: int = 1000,
+                    input_signals: list = [],
+                    output_signals: list = []
                 ):
         self.frequency = frequency
         super().__init__(
@@ -34,6 +34,17 @@ class LinuxTimer(MARTe2DataSource):
         self.frequency = frequency
         self.phase = phase
         self.sleep_percentage = sleep_percentage
+
+    # pylint: disable=line-too-long
+    def toPython(self, app_name):
+        header = "from martepy.marte2.datasources.linux_timer import LinuxTimer\n"
+
+        content = f"""_{self.configuration_name} = LinuxTimer('{self.configuration_name}', '{self.sleep_nature}', '{self.execution_mode}',
+                                {self.cpu_mask}, {self.sleep_percentage}, {self.phase}, {self.frequency}, {self.input_signals}, {self.output_signals})
+
+{app_name}.additional_datasources += [_{self.configuration_name}]\n\n"""
+
+        return content, header
 
     def _defineBasicSignal(self, name, marte_type):
         ''' Simplification of defining the output signals '''

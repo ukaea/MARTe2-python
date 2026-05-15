@@ -113,7 +113,7 @@ def test_app_functions(setup_simple_app):
     assert app.logging_iogam.output_signals == [('Counter', {'MARTeConfig': {'DataSource': 'LogGAMSource', 'Type': 'uint32', 'NumberOfDimensions': '1', 'NumberOfElements': '1'}}), ('Time', {'MARTeConfig': {'DataSource': 'LogGAMSource', 'Type': 'uint32', 'NumberOfDimensions': '1', 'NumberOfElements': '1'}})]
 
     filewriter = app.additional_datasources[-1]
-    assert filewriter.configuration_name == '+LoggingFileWriter'
+    assert filewriter.configuration_name == 'LoggingFileWriter'
     assert filewriter.input_signals == [('Counter', {'MARTeConfig': {'Type': 'uint32', 'NumberOfDimensions': '1', 'NumberOfElements': '1'}}), ('Time', {'MARTeConfig': {'Type': 'uint32', 'NumberOfDimensions': '1', 'NumberOfElements': '1'}})]
 
     removed_gam = GAMDataSource('DDB')

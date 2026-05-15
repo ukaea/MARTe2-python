@@ -7,12 +7,20 @@ class MARTe2HttpDirectoryResource(MARTe2ConfigObject):
     ''' Pythonic representation of the directory resource '''
     def __init__(self,
                     configuration_name: str = 'WebRoot',
-                    basedir = "",
+                    basedir: str = "",
                 ):
         self.class_name = 'HttpDirectoryResource'
         self.basedir = basedir
         super().__init__()
-        self.configuration_name = configuration_name
+        self.configuration_name = configuration_name.lstrip('+')
+
+    # pylint: disable=line-too-long, W0613
+    def toPython(self, app_name, parent_name=None):
+        header = "from martepy.marte2.objects.http.directoryresource import MARTe2HttpDirectoryResource\n"
+
+        content = f"""\n\n_{self.configuration_name} = MARTe2HttpDirectoryResource('{self.configuration_name}', '{self.basedir}')"""
+
+        return content, header
 
     def write(self, config_writer):
         ''' Write the configuration of our object '''
