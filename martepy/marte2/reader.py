@@ -372,7 +372,7 @@ def readApplicationText(file_content, read_func=buildTree): # pylint: disable=R0
     interfaces = []
     not_interfaces = ('RealTimeApplication','StateMachine','HttpObjectBrowser','HttpService')
     interfaces = [a for a in tree_root.children if a.parameters['Class'] not in not_interfaces]
-    return app, new_state_machine, found_http_browser, http_messages, interfaces
+    return app, new_state_machine, found_http_browser, http_messages, interfaces, found_http_service
 
 def getStates(application_definition, function_map, app):
     ''' Get an applications states definition '''

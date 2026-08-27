@@ -19,10 +19,10 @@ Req:
     - It will then create a AsyncBridge between the two threads to bring that 
       threads' signals into thread 0.
 """
-import copy
+import copy, os
 
 from martepy.functions.extra_functions import getname # pylint: disable=W0614
-from martepy.functions.gam_functions import (getAlias,
+from martepy.functions.gam_functions import (assignUniqueName, getAlias,
                                              isMatchingSignal,
                                              findSignalInFunctionList,
                                              getKeyAttribute,
@@ -46,7 +46,7 @@ class SimulationGenerator():
     *** It is a highly complex set of functions as it achieves a complex task - as a result, we've
     pylint disabled a few check regarding complex code but we're not exceeding those parameters
     too much and most of these have thorough commenting in. ***'''
-    def __init__(self, app, configure=True):
+    def __init__(self, app, cwd, configure=True):
         """Initialise our simulation generator object
         """
         self.original_app = app
@@ -55,6 +55,7 @@ class SimulationGenerator():
         self.state_constant_vals = {}
         self.gam_sources = []
         self.replaced_datasources = []
+        self.cwd = cwd
         if configure:
             # Configure immediately
             self.configure()
@@ -281,8 +282,17 @@ class SimulationGenerator():
                             if datasource in ninternal_datasources:
                                 # This feeds to the outside world - we don't want to do this,
                                 # we should place it into our misc DDB
-                                qsignal = function.output_signals[o_i]
-                                qsignal[1]['MARTeConfig']['DataSource'] = self.misc_ddb
+                                matching_signals = [
+                                    signal
+                                    for thread in state.threads.objects
+                                    for obj in thread.functions
+                                    for signal in obj.output_signals
+                                    if signal[1].get('MARTeConfig', {}).get('DataSource')
+                                        == self.misc_ddb.lstrip('+')
+                                ]
+                                qsignal = assignUniqueName(function.output_signals[o_i], matching_signals)
+                                qsignal[1]['MARTeConfig']['Alias'] = qsignal[0]
+                                qsignal[1]['MARTeConfig']['DataSource'] = self.misc_ddb.lstrip('+')
 
                 if added:
                     # If we needed to replace signals, now we can add our constant GAM as it
@@ -369,7 +379,10 @@ class SimulationGenerator():
         self.simulation_app.sanitize()
 
         self.simulation_app.removeUnused()
-
+        SimulinkWrapperGAMs = [obj for obj in self.simulation_app.functions if getattr(obj, "class_name", None) == "SimulinkWrapperGAM" ]
+        self.simulation_app.libraries = copy.deepcopy([obj.library for obj in SimulinkWrapperGAMs])
+        for simwrapper in SimulinkWrapperGAMs:
+            simwrapper.library = os.path.join(self.cwd, os.path.basename(simwrapper.library)).replace('\\','/').replace('\\\\','/') # TODO: set for tempfolder and .so name
         # Now we want to insert the internals of types we don't have in the application
         # Need to insert these into the objects part of the application so they appear
         # at the very start
