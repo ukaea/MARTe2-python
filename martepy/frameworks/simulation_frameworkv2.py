@@ -19,7 +19,8 @@ Req:
     - It will then create a AsyncBridge between the two threads to bring that 
       threads' signals into thread 0.
 """
-import copy, os
+import os
+import copy
 
 from martepy.functions.extra_functions import getname # pylint: disable=W0614
 from martepy.functions.gam_functions import (assignUniqueName, getAlias,
@@ -290,7 +291,9 @@ class SimulationGenerator():
                                     if signal[1].get('MARTeConfig', {}).get('DataSource')
                                         == self.misc_ddb.lstrip('+')
                                 ]
-                                qsignal = assignUniqueName(function.output_signals[o_i], matching_signals)
+                                qsignal = assignUniqueName(
+                                    function.output_signals[o_i], matching_signals
+                                )
                                 qsignal[1]['MARTeConfig']['Alias'] = qsignal[0]
                                 qsignal[1]['MARTeConfig']['DataSource'] = self.misc_ddb.lstrip('+')
 
@@ -379,10 +382,15 @@ class SimulationGenerator():
         self.simulation_app.sanitize()
 
         self.simulation_app.removeUnused()
-        SimulinkWrapperGAMs = [obj for obj in self.simulation_app.functions if getattr(obj, "class_name", None) == "SimulinkWrapperGAM" ]
+        SimulinkWrapperGAMs = [
+            obj for obj in self.simulation_app.functions
+            if getattr(obj, "class_name", None) == "SimulinkWrapperGAM"
+        ]
         self.simulation_app.libraries = copy.deepcopy([obj.library for obj in SimulinkWrapperGAMs])
         for simwrapper in SimulinkWrapperGAMs:
-            simwrapper.library = os.path.join(self.cwd, os.path.basename(simwrapper.library)).replace('\\','/').replace('\\\\','/') # TODO: set for tempfolder and .so name
+            simwrapper.library = os.path.join(
+                self.cwd, os.path.basename(simwrapper.library)
+            ).replace('\\','/').replace('\\\\','/') # TODO: set for tempfolder and .so name
         # Now we want to insert the internals of types we don't have in the application
         # Need to insert these into the objects part of the application so they appear
         # at the very start

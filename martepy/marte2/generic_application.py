@@ -788,7 +788,7 @@ def getApplication():
 
                 # Remove the bridge as it is unused
                 self.additional_datasources.remove(bridge)
-                
+
         currentstates = []
         for index, state in enumerate(self.states):
             #Ensure unique states only

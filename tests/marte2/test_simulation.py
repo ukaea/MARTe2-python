@@ -9,7 +9,7 @@ def test_simulation():
     app = readApplication(cfg_file)[0]
     type_dir = os.path.abspath(os.path.join(os.path.dirname(os.path.dirname(__file__)), 'type_db'))
     app.loadTypeLibrary(type_dir)
-    sim_generator = SimulationGenerator(app)
+    sim_generator = SimulationGenerator(app, os.getcwd())
     sim_generator.build()
 
     test_dir = os.path.abspath(os.path.join(os.path.dirname(os.path.dirname(__file__)), 'frameworks', 'simulation_framework'))
@@ -19,5 +19,5 @@ def test_simulation():
     for test_file in files:
         app = readApplication(os.path.join(test_dir, test_file))[0]
         app.loadTypeLibrary(type_dir)
-        sim_generator = SimulationGenerator(app)
+        sim_generator = SimulationGenerator(app, os.getcwd())
         sim_generator.build()

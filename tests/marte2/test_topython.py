@@ -215,7 +215,7 @@ def test_complex_python_app():
     with open(app_file, 'r') as appfile:
         file_contents = appfile.read()
 
-    app, new_state_machine, found_http_browser, http_messages, interfaces = readApplicationText(file_contents)
+    app, new_state_machine, found_http_browser, _, interfaces, _ = readApplicationText(file_contents)
 
     app.add(externals=[new_state_machine])
     app.add(externals=[found_http_browser])

@@ -49,7 +49,8 @@ disable = [
     "E0611",
     "R0903",
     "I1101",
-    "W0221"
+    "W0221",
+    "W0511",
 ]
 max-line-length = 100
 ignore = ["tests", "docs", "examples", "build"]
