@@ -66,7 +66,8 @@ def test_AsyncBridge(blocking_mode, configuration_name, heapname, input, numbuff
     test_writer = writeSignals_section(input_signals, [])
 
     assert str(setup_writer) == f'''+{configuration_name} = {{
-    Class = RealTimeThreadAsyncBridge\n}}'''
+    Class = RealTimeThreadAsyncBridge
+    NumberOfBuffers = {numbuffers}\n}}'''
 
     example_asyncbridge.loadParameters(load_parameters, GAMNode(example_asyncbridge))
 

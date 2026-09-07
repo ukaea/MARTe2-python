@@ -53,7 +53,7 @@ class AsyncBridge(MARTe2DataSource):
         ''' Write the datasource configuration to the cfg. '''
         # Based on experience and padova examples, prescibing any information to the datasource
         # results in exceptions
-        # config_writer.writeNode('NumberOfBuffers', '"{}"'.format(self.numbuffers))
+        config_writer.writeNode('NumberOfBuffers', f'{self.numbuffers}')
         # config_writer.writeNode('HeapName', '"{}"'.format(self.heapname))
         # config_writer.writeNode('BlockingMode', '"{}"'.format(self.blocking_mode))
         # config_writer.writeNode('ResetMSecTimeout', '"{}"'.format(self.resetmsec_timeout))
