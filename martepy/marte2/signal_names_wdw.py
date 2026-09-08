@@ -1,9 +1,10 @@
 ''' The window in the XMARTe2 GUI that loads to configure signals, exists here as is 
 launched from the GAM itself. '''
 
+import csv
 from functools import partial
 import os
-from PyQt5.QtCore import Qt
+from PyQt5.QtCore import Qt, QSignalBlocker
 from PyQt5.QtWidgets import (
     QDesktopWidget,
     QWidget,
@@ -13,7 +14,9 @@ from PyQt5.QtWidgets import (
     QVBoxLayout,
     QHBoxLayout,
     QPushButton,
-    QMainWindow
+    QMainWindow,
+    QFileDialog,
+    QMessageBox,
 )
 from qtpy.QtGui import QIcon
 
@@ -51,7 +54,7 @@ class SignalWdw(QMainWindow):
         self.vlayout.addWidget(self.signal_tbl, stretch=1)
         signals = node.outputsb if self.io == 'output' else node.inputsb
         self.signal_tbl.setRowCount(len(signals))
-        headers = ["Signal Name", "Datasource", "Type",
+        headers = ["Signal Name", "DataSource", "Type",
                    "NumberOfDimensions", "NumberOfElements", 'Alias']
 
         self.is_datasource = isinstance(self.node.application.API.toGAM(self.node),
@@ -69,11 +72,197 @@ class SignalWdw(QMainWindow):
 
         self.handleIo()
 
+        # Load/Export signals
+        file_buttons = QWidget()
+        file_layout = QHBoxLayout()
+        file_buttons.setLayout(file_layout)
+        # Load signals from file
+        self.load_signals = QPushButton("Load Signals")
+        self.load_signals.clicked.connect(self.openLoadSignals)
+        file_layout.addWidget(self.load_signals)
+        # Export signals to file
+        self.export_signals = QPushButton("Export Signals")
+        self.export_signals.clicked.connect(self.openExportSignals)
+        file_layout.addWidget(self.export_signals)
+
+        self.vlayout.addWidget(file_buttons)
+
         self.defineSaveCancelButtons(self.vlayout)
         self.resize(self.signal_tbl.horizontalHeader().length() + 80, self.height())
         self.show()
         # Center the window on the screen
         self.center()
+
+    def validateCsv(self, file_path):
+        """
+        Validate the loaded signal CSV against the current signal table.
+        """
+        expected_headers = [
+            self.signal_tbl.horizontalHeaderItem(column).text()
+            for column in range(self.signal_tbl.columnCount() - 1)
+        ]
+
+        rows = []
+
+        with open(file_path, "r", encoding="utf-8-sig", newline="") as fhand:
+            reader = csv.reader(fhand)
+
+            try:
+                headers = next(reader)
+            except StopIteration as exc:
+                raise ValueError("The CSV file is empty.") from exc
+
+            headers = [header.strip() for header in headers]
+
+            if headers != expected_headers:
+                raise ValueError(
+                    "The CSV headers do not match the signal table.\n\n"
+                    f"Expected:\n{', '.join(expected_headers)}\n\n"
+                    f"Found:\n{', '.join(headers)}"
+                )
+
+            for line_num, row in enumerate(reader, start=2):  # skip header line
+                if not row or all(not value.strip() for value in row):
+                    continue  # skip blank rows
+                if len(row) != len(expected_headers):
+                    raise ValueError(
+                        f"Line {line_num} contains {len(row)} columns, "
+                        f"but {len(expected_headers)} were expected."
+                    )
+                row = [value.strip() for value in row]
+
+                config = {"MARTeConfig": {}}
+
+                for header, value in zip(headers, row):
+                    if header != "Signal Name":
+                        config["MARTeConfig"][header] = value
+
+                rows.append((row[0], config))
+
+        fhand.close()
+
+        if len(rows) != self.signal_tbl.rowCount():
+            raise ValueError(
+                f"The CSV contains {len(rows)} signals, "
+                f"but the table contains {self.signal_tbl.rowCount()} signals."
+            )
+
+        return rows
+
+    def populateSignalTable(self, rows):
+        """
+        Replace the contents of the signal table with the validated CSV data.
+        """
+        if len(rows) != self.signal_tbl.rowCount():
+            raise ValueError(
+                "The number of CSV rows does not match the signal table."
+            )
+
+        blocker = QSignalBlocker(self.signal_tbl)  # block itemChanged temporarily
+
+        try:
+            for row_num, signal in enumerate(rows):
+                self.createSignalRow(
+                    signal,
+                    self.is_datasource,
+                    row_num,
+                )
+        finally:
+            del blocker
+
+        self.handleSamples()
+        self.handleIo()
+
+    def openLoadSignals(self):
+        """
+        Load signal CSV file.
+        """
+        QMessageBox.warning(
+            self,
+            "Load Signals",
+            "This is an experimental feature. Proceed at your own risk.\n"
+            "We will check your CSV is the expected shape, but the burden of "
+            "responsibility for the contents of each element is on you."
+        )
+        file_path, _ = QFileDialog.getOpenFileName(
+            self,
+            "Select File",
+            "",
+            "CSV Files (*.csv)",
+        )
+        if not file_path:
+            return
+
+        try:
+            rows = self.validateCsv(file_path)
+        except ValueError as exc:
+            QMessageBox.warning(
+                self,
+                "Invalid CSV",
+                str(exc),
+            )
+            return
+        except (OSError) as exc:
+            QMessageBox.critical(
+                self,
+                "Could not open file",
+                f"Could not read the CSV file:\n{exc}",
+            )
+            return
+        self.populateSignalTable(rows)
+
+    def exportCsv(self, file_path):
+        """
+        Export signal CSV file.
+        """
+        column_count = self.signal_tbl.columnCount() - 1
+
+        headers = [
+            self.signal_tbl.horizontalHeaderItem(column).text()
+            for column in range(column_count)
+        ]
+
+        with open(file_path, "w", encoding="utf-8", newline="") as fhand:
+            writer = csv.writer(fhand)
+
+            writer.writerow(headers)
+
+            for row in range(self.signal_tbl.rowCount()):
+                values = []
+                for column in range(column_count):
+                    item = self.signal_tbl.item(row, column)
+
+                    if item is None:
+                        values.append("")
+                    else:
+                        values.append(item.text())
+
+                writer.writerow(values)
+
+    def openExportSignals(self):
+        """
+        Export the current signal table to CSV file.
+        """
+        file_path, _ = QFileDialog.getSaveFileName(
+            self,
+            "Export Signals",
+            "",
+            "CSV Files (*.csv)",
+        )
+        if not file_path:
+            return
+
+        if not file_path.lower().endswith(".csv"):
+            file_path += ".csv"
+
+        try:
+            self.exportCsv(file_path)
+        except OSError as exc:
+            QMessageBox.critical(
+                self,
+                "Could not save file",
+                f"Could not write the CSV file:\n{exc}",
+            )
 
     def handleSamples(self):
         ''' Handles whether our signal supports the samples attribute '''
